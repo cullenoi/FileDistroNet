@@ -17,8 +17,7 @@ void list_remove(node_list * old_node, node_list * head);
 int rendezvous(int file_key, int file_seg, node_list * head);
  
 // hash function develops a int based on input parameters... aim to be as distributed as possible among all possible outcomes...
-int hash(int key, int seg, node);
-
+int hash(int key, int seg, int node);
 
 #endif MODULE_TRACKER
 

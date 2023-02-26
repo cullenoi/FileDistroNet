@@ -55,7 +55,7 @@ int rendezvous(int file_key, int file_seg, node_list * head){
 }
 
 // devolops a hash key based on the file, file segment, and target node...
-int hash(int key, int seg, node){
+int hash(int key, int seg, int node){
 
     long long unsigned mul;
     mul = key * seg;
