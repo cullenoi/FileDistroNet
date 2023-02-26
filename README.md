@@ -6,4 +6,4 @@
 * http://cs.berry.edu/~nhamid/p2p/index.html
 * Note for the first and last link both involve the use of threads...
 * https://beej.us/guide/bgnet/html/#structs //Essential Guide to UNIX C networking really in depth
-* 
+* https://www.youtube.com/live/oHBi8k31fgM?feature=share // P2P network design in C (2hrs)
