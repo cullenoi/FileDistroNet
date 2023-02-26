@@ -27,7 +27,7 @@ void* Server(void* a){
         printf("Server Error on Construction Stage Terminating.");
         exit(0);
     }
-    
+	// inf. loop 
     while(1){
         // int client = accept(Server.socket)
 
