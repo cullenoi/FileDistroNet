@@ -2,6 +2,8 @@
 #include <vector.h>
 #include <time.h>
 
+#include "Tracker.h"
+
 
 using namespace std;
 
@@ -9,7 +11,7 @@ class Node{
 
     private:
         unsigned address;
-        vector<unsigned> address_book;
+        node_list * address_book;
         //book_date: yy/mm/dd/hh/mm/ss/..
         unsigned book_date;
 
@@ -18,7 +20,7 @@ class Node{
         init_node();
         book_spead();
         book_seek();
-        
+
 
 }
 

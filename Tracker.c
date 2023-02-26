@@ -2,15 +2,6 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "Node.h"
-
-// list of nodes within the network, can be updated...
-typedef struct node_list{
-
-    int id;
-    node_list * next;
-
-} node_list;
 
 void list_add(node_list * new_node, node_list * head){
 
