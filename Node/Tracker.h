@@ -7,6 +7,12 @@ typedef struct node_list{
     node_list * next;
 } node_list;
 
+typedef struct edge_list{
+    int id1;
+    int id2;
+    int weight;
+    edge_list * next;
+};
 // add a node to the node list
 void list_add(node_list * new_node, node_list * head);
 
