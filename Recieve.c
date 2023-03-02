@@ -1,6 +1,5 @@
 #include "PublicDef.h"
 
-
 int main()
 {
     int force =1;
@@ -41,35 +40,33 @@ int main()
     }
     printf("Listening...\n");
 
+
+        //TODO FIX THIS THINGY
     while(1){
-    sleep(3);//Sleep for a bit to allow the client to do stuff..a
-    printf("@INHERE\n");
+        int confd,i;
+			int ret=0;
+			char ip[17];
+			char filename[30];
     addr_size = sizeof their_addr;
     if(talkfd = accept(sockfd, (struct sockaddr *)&their_addr, &addr_size)<0){//errno -1 for socket err will cal that variable gloabaly
       printf("INIT_Server Accept failed...\n");
         continue;
     }
     printf("Connected to a client\n");
-    // inet_ntop(their_addr.ss_family,
-            // get_in_addr((struct sockaddr *)&their_addr),//this function gets the address of the device connecting
-            // s, sizeof s);
-        // printf("server: got connection from %s\n", s);
+    
+        char buff[MAX];
  printf("in loop\n");
-    char buff[MAX];
-    int n;
-    int f;
-    // infinite loop for chat
-        bzero(buff, MAX);
+int n=0;
+int len;
+ len = strlen(buff);
         // read the message from client and copy it in buffer
-      if((n= recv(talkfd, buff, sizeof(buff), 0))<0){
-        printf("ERROR HERE...\n");
+      if((n= recv(talkfd, (void*)buff, len, 0))==-1){
+        printf("ERROR HERE in RECIEVING THE FUCKING FILE\n");\
       }
                    printf("\n%s\n", buff);
         // print buffer which contains the client contents
-        printf("From client: %s\t", buff);
-       
-        // if msg co
-    
+        printf("From client: %s\t\n", buff);
+      
    }   
 
 

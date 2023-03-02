@@ -1,9 +1,9 @@
 #include "PublicDef.h"
+#include <stdio.h>
 
 int main(){
 
 
-    char buffer[2000] = {0};
     // Fetching port number
     int PORT_server;
 
@@ -45,23 +45,19 @@ if (connect(Csockfd, (struct sockaddr *)&Chints,sizeof Chints) == -1) {
 //             s, sizeof s);
     printf("client: connecting to %s\n", s);
 
-char* buff[MAX];
-buff[MAX] = '\0';
+
+
+
 unsigned long ha =(MAX);
 
 	int n;
 	
-
-     
-		bzero(buff, sizeof(buff));
-		printf("Enter the string : ");
-        getline(&buff,&ha,stdin);
-		n = 0;
-		while ((buff[n++] = getchar()) != '\n')
-			;
-        send(Csockfd, buff[MAX], 13, 0)	;
-        	bzero(buff, sizeof(buff));
-	
+	// 	char* name =(char*)malloc(sizeof(20));
+    // 	printf("Enter the string : \n");
+    // scanf(" %19d", &name);  
+    char* name ="HI\0" ;
+        // name[20] ='\0';
+        send(Csockfd, name, sizeof(name), 0);
 	
 	
 
