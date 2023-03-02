@@ -79,9 +79,9 @@ class Node{
                         node_curr = curr->next;
                     }
                     // check if the dist through node u is shorter than the current route...
-                    
+
                     //TODO: implement a vector table for routing
-                    if(u->dist + )
+                    if(u->dist + );
                     edge_curr = edge_curr->next;
                 }
                 curr = curr->next;
