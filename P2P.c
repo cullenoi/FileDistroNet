@@ -157,39 +157,6 @@ int Server()
 return 0;
 }
 
-// int ListenA(){
-
-//     if(listen(sockfd,BACKLOG)<0)//-1 = errno
-//     {
-//         printf("INIT_Server socket Listening failed...\n");
-//         return 1;
-//     }
-//     printf("Listening...\n");
-//     //accept time how it works is somewhere will try to call coonect()
-//     //to the port im listening on..
-//     // Their connection will be queued waiting to be accepted()
-//     // you call accept tell it to get the pending connection
-//     // IT WILL RETURN A NEW SOCKFD FOR THIS CONNECTIONTHE FIRST SOCKFD IS STILL LISTENING FOR NEWCOMERS
-//     // BUT THE NEW ONE HANDLES SOLELY THE BACK AND FORTH WITH THIS CONN
-// while(1){
-//     addr_size = sizeof their_addr;
-//     if(talkfd = accept(sockfd, (struct sockaddr *)&their_addr, &addr_size)<0){//errno -1 for socket err will cal that variable gloabaly
-//       printf("INIT_Server Accept failed...\n");
-//         continue;
-//     }
-//     printf("Connected to a client\n");
-//     // inet_ntop(their_addr.ss_family,
-//             // get_in_addr((struct sockaddr *)&their_addr),//this function gets the address of the device connecting
-//             // s, sizeof s);
-//         // printf("server: got connection from %s\n", s);
-
-// Recieve(talkfd);
-// close(sockfd);// Command exits as connection is finished..
-//     //TODO//
-//     // simple messaging for DEV Please remove afterusage....
-// }
-// return 0; // all ran smoothly server is going to sleep
-// }
 
 
 
@@ -232,30 +199,26 @@ void Recieve(int connfd)// delete after usage..
 
 //     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 // }
-void Send(int sockfd)// Simple chat program which generates a string and sends it.
-{
-	char buff[MAX];
-	int n;
-	for (;;) {
+// void Send(int FUCKfd)// Simple chat program which generates a string and sends it.
+// {
+	// char buff[MAX];
+	// int n;
+	// for (;;) {
 
-        char *msg = "Beej was here!";
-int len, bytes_sent;
-
-len = strlen(msg);
-bytes_sent = send(sockfd, msg, len, 0);
-		// bzero(buff, sizeof(buff));
-		// printf("Enter the string : ");
-		// n = 0;
-		// while ((buff[n++] = getchar()) != '\n')
-		// 	;
-		// send(Csockfd, buff, sizeof(buff),0);
-		// bzero(buff, sizeof(buff));
-		// if ((strncmp(buff, "exit", 4)) == 0) {
-		// 	printf("Client Exit...\n");
-		// 	break;
-		// }
-	}
-}
+     
+	// 	bzero(buff, sizeof(buff));
+	// 	printf("Enter the string : ");
+	// 	n = 0;
+	// 	while ((buff[n++] = getchar()) != '\n')
+	// 		;
+	// 	send(FUCKfd, buff, sizeof(buff),0);
+	// 	bzero(buff, sizeof(buff));
+	// 	if ((strncmp(buff, "exit", 4)) == 0) {
+	// 		printf("Client Exit...\n");
+	// 		break;
+	// 	}
+	// }
+// }
 
 int ClientCreate()
 {
@@ -303,8 +266,24 @@ if (connect(Csockfd, (struct sockaddr *)&Chints,sizeof Chints) == -1) {
 //             s, sizeof s);
     printf("client: connecting to %s\n", s);
 
+char buff[MAX];
+	int n;
+	for (;;) {
 
-	Send(Csockfd);
+     
+		bzero(buff, sizeof(buff));
+		printf("Enter the string : ");
+		n = 0;
+		while ((buff[n++] = getchar()) != '\n')
+			;
+		send(Csockfd, buff, sizeof(buff),0);
+		bzero(buff, sizeof(buff));
+		if ((strncmp(buff, "exit", 4)) == 0) {
+			printf("Client Exit...\n");
+			break;
+		}
+	}
+	
 
 	// close the socket
 	close(Csockfd);
