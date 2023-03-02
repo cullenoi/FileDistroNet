@@ -4,9 +4,11 @@
 // list of nodes within the network, can be updated...
 typedef struct node_list{
     int id;
+    int dist;
     node_list * next;
 } node_list;
 
+// list of connections between nodes in the network
 typedef struct edge_list{
     int id1;
     int id2;
