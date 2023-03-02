@@ -166,22 +166,54 @@ void Recieve(int connfd)// delete after usage..
     char buff[MAX];
     int n;
     int f;
+    fd_set curr_socks, ready_socks;
+
+    FD_ZERO(&curr_socks);
+    FD_SET(connfd, &curr_socks);
     // infinite loop for chat
-   for(;;){
-    sleep(3);
-        bzero(buff, MAX);
-        // read the message from client and copy it in buffer
-       n= recv(connfd, buff, sizeof(buff), 0);
-                    printf("\n%s\n", buff);
-        // print buffer which contains the client contents
-        printf("From client: %s\t", buff);
-       
-        // if msg contains "Exit" then server exit and chat ended.
-        if (strncmp("exit", buff, 4) == 0) {
-            printf("Server Exit...\n");
-            return;
+   int k = 0;
+   printf("Entering loop\n");
+    while (1)
+    {
+        k++;
+        ready_socks = curr_socks;
+
+        if (select(FD_SETSIZE, &ready_socks, NULL, NULL, NULL) < 0)
+        {
+            perror("Error");
+            exit(EXIT_FAILURE);
         }
-   }   
+
+        for (int i = 0; i < FD_SETSIZE; i++)
+        {
+            if (FD_ISSET(i, &ready_socks))
+            {
+
+                if (i == connfd)
+                {
+                    int client_socket;
+
+                    if ((client_socket = accept(connfd, (struct sockaddr *)&their_addr,
+                                                (socklen_t *)&addr_size)) < 0)
+                    {
+                        perror("accept");
+                        exit(EXIT_FAILURE);
+                    }
+                    FD_SET(client_socket, &curr_socks);
+                }
+                else
+                {
+                    n = recv(i, buff, sizeof(buff), 0);
+                    printf("\n%s\n", buff);
+                    FD_CLR(i, &curr_socks);
+                }
+            }
+        }
+
+        if (k == (FD_SETSIZE * 2))
+            break;
+    }
+    printf("out of loop :(\n");
 }
 
 ////////////////////////////////////////////////////////////////////////////

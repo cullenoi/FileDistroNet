@@ -57,10 +57,10 @@ unsigned long ha =(MAX);
 		printf("Enter the string : ");
         getline(&buff,&ha,stdin);
 		n = 0;
-		while ((buff[n++] = getchar()) != '\n')
-			;
-        send(Csockfd, buff[MAX], 13, 0)	;
-        	bzero(buff, sizeof(buff));
+		while ((buff[n++] = getchar()) != '\n');
+        buff[n+1] = '\0';
+        send(Csockfd, buff[MAX], 13, 0);
+        bzero(buff, sizeof(buff));
 	
 	
 	
