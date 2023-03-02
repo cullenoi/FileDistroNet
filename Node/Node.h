@@ -7,10 +7,10 @@ class Node {
 
     private:
         unsigned address;
-        node_list * address_book;
+        node * address_book;
         unsigned date;
     public:
-        int init_node(node_list * book, unsigned address);
+        int init_node(char * argv);
         int book_update();
         int BellmanFort();
         

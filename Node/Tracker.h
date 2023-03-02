@@ -1,28 +1,41 @@
 #ifndef MODULE_TRACKER
 #define MODULE_TRACKER
 
+#include <vector>
+// simulated package of data.
+typedef struct dataset{
+    int file;
+    int seg;
+    char * data;
+} dataset;
+
 // list of nodes within the network, can be updated...
-typedef struct node_list{
+typedef struct node{
     int id;
-    int dist;
-    node_list * next;
-} node_list;
+    node * next;
+} node;
 
 // list of connections between nodes in the network
-typedef struct edge_list{
-    int id1;
-    int id2;
+typedef struct edge{
+    node * n;
     int weight;
-    edge_list * next;
-};
+    edge * e_next;
+} edge;
+
+//Network Struct
+typedef struct NETWORK{
+    node * N;
+    edge ** E;
+} NETWORK;
+
 // add a node to the node list
-void list_add(node_list * new_node, node_list * head);
+void list_add(node * new_node, node * head);
 
 // remove a node from the list.. re allocate all the data from the node into the network...
-void list_remove(node_list * old_node, node_list * head);
+void list_remove(node * old_node, node * head);
 
 // choose the node to send a segment of a file to... highest weighed node wins...
-int rendezvous(int file_key, int file_seg, node_list * head);
+int rendezvous(int file_key, int file_seg, node * head);
  
 // hash function develops a int based on input parameters... aim to be as distributed as possible among all possible outcomes...
 int hash(int key, int seg, int node);

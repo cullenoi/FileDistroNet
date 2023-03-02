@@ -2,18 +2,19 @@
 #include <stdio.h>
 #include <math.h>
 
+#include "Tracker.h"
 
-void list_add(node_list * new_node, node_list * head){
+void list_add(node * new_node, node * head){
 
-    node_list * temp = head;
+    node * temp = head;
     head = new_node;
     head->next = temp;
 }
 
-void list_remove(node_list * old_node, node_list * head){
+void list_remove(node * old_node, node * head){
 
-    node_list * curr = head;
-    node_list * prev; 
+    node * curr = head;
+    node * prev; 
     if(head->id == old_node->id){
         prev = head;
         head->next = head;
@@ -23,22 +24,22 @@ void list_remove(node_list * old_node, node_list * head){
         if(curr->id == old_node->id){
             prev->next = curr->next;
             dalloc_node(curr);
-            printf("Node succesfully removed from list... data re-allocated\n")
-            return void;
+            printf("Node succesfully removed from list... data re-allocated\n");
+            return;
         }
         prev = curr;
         curr = curr->next;
     }
     printf("Error: node not found (list_remove)\n");
-    return void;
+    return;
 }
  
 // finds the node with the highest weighting...
 // i.e. the node of which to distribute for a certain segment of a certain file...
-int rendezvous(int file_key, int file_seg, node_list * head){
+int rendezvous(int file_key, int file_seg, node * head){
 
     int best_node = 0, hash_val, best_hash = 0;
-    node_list * curr = head;
+    node * curr = head;
 
 
     while(curr->next != NULL){
