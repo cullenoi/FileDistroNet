@@ -1,5 +1,6 @@
 #include "PublicDef.h"
 
+
 int main()
 {
     int force =1;
@@ -40,39 +41,97 @@ int main()
     }
     printf("Listening...\n");
 
+    fd_set current_sockets, ready_sockets;
+    addr_size=sizeof(their_addr);
+    // Initialize my current set
+    FD_ZERO(&current_sockets);
+    FD_SET(sockfd, &current_sockets);
+    int k=0;
+    int n;
+            char buff[MAX]={0};
 
         //TODO FIX THIS THINGY
-    while(1){
-        int confd,i;
-			int ret=0;
-			char ip[17];
-			char filename[30];
-    addr_size = sizeof their_addr;
-    if(talkfd = accept(sockfd, (struct sockaddr *)&their_addr, &addr_size)<0){//errno -1 for socket err will cal that variable gloabaly
-      printf("INIT_Server Accept failed...\n");
-        continue;
+      while (1)
+    {
+        k++;
+        ready_sockets = current_sockets;
+
+        if (select(FD_SETSIZE, &ready_sockets, NULL, NULL, NULL) < 0)
+        {
+            perror("Error");
+            exit(EXIT_FAILURE);
+        }
+
+        for (int i = 0; i < FD_SETSIZE; i++)
+        {
+            if (FD_ISSET(i, &ready_sockets))
+            {
+
+                if (i == sockfd)
+                {
+                    int client_socket;
+
+                    if ((client_socket = accept(sockfd, (struct sockaddr *)&their_addr,
+                                                (socklen_t *)&addr_size)) < 0)
+                    {
+                        perror("accept");
+                        exit(EXIT_FAILURE);
+                    }
+                    FD_SET(client_socket, &current_sockets);
+                }
+                else
+                {
+                    n = recv(i, buff, sizeof(buff), 0);
+                    printf("\n%s\n", buff);
+                    FD_CLR(i, &current_sockets);
+                }
+            }
+        }
+
+        if (k == (FD_SETSIZE * 2))
+            break;
     }
-    printf("Connected to a client\n");
-    
-        char buff[MAX];
- printf("in loop\n");
-int n=0;
-int len;
- len = strlen(buff);
-        // read the message from client and copy it in buffer
-      if((n= recv(talkfd, (void*)buff, len, 0))==-1){
-        printf("ERROR HERE in RECIEVING THE FUCKING FILE\n");\
-      }
-                   printf("\n%s\n", buff);
-        // print buffer which contains the client contents
-        printf("From client: %s\t\n", buff);
-      
-   }   
 
-
-
-close(talkfd);// Command exits as connection is finished..
-    //TODO simple messaging for DEV Please remove afterusage....
-
-return 0;
+   return 0;
 }
+
+
+
+//     while(1){
+//         int confd,i;
+// 			int ret=0;
+// 			char ip[17];
+// 			char filename[30];
+//     addr_size = sizeof(their_addr);
+//     if(talkfd = accept(sockfd, (struct sockaddr *)&their_addr, (socklen_t *)&addr_size)<0){//errno -1 for socket err will cal that variable gloabaly
+//       printf("INIT_Server Accept failed...\n");
+//         continue;
+//     }
+//     printf("Connected to a client\n");
+    
+//         char buff[MAX]={0};
+//  printf("in loop\n");
+// int n=0;
+// int len;
+//  len = strlen(buff);
+//          bzero(buff, MAX);
+//         // read the message from client and copy it in buffer
+
+//           FD_SET(talkfd, &current_sockets);
+
+//       if((n= recv(talkfd, (void*)buff, len, 0))==-1){
+//         printf("ERROR HERE in RECIEVING THE FUCKING FILE\n");\
+//       }
+
+//         // print buffer which contains the client contents
+//         printf("From client: %s\t\n", buff);
+      
+//    }   
+
+
+
+// close(talkfd);// Command exits as connection is finished..
+//     //TODO simple messaging for DEV Please remove afterusage....
+
+// return 0;
+// }

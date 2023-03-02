@@ -17,7 +17,7 @@
 
  int sockfd , talkfd ;//SOCKET FILE DESCRIPTOR returns -1 on errno
     struct sockaddr_in hints;
-    struct sockaddr_storage their_addr;
+    struct sockaddr_in their_addr;
     socklen_t addr_size;
 // #define PORT "3490"  // the port users will be connecting to
 // #define PORTC "3490"
