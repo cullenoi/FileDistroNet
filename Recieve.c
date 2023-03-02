@@ -41,49 +41,51 @@ int main()
     }
     printf("Listening...\n");
 
-    fd_set current_sockets, ready_sockets;
+    fd_set active, read;
     addr_size=sizeof(their_addr);
     // Initialize my current set
-    FD_ZERO(&current_sockets);
-    FD_SET(sockfd, &current_sockets);
+    FD_ZERO(&active);
+    FD_SET(sockfd, &active);
     int k=0;
     int n;
             char buff[MAX]={0};
 
-        //TODO FIX THIS THINGY
+        // TODO FIX THIS THINGY
       while (1)
     {
-        k++;
-        ready_sockets = current_sockets;
+     
+        read = active;
 
-        if (select(FD_SETSIZE, &ready_sockets, NULL, NULL, NULL) < 0)
+        if (select(FD_SETSIZE, &read, NULL, NULL, NULL) < 0)
         {
             perror("Error");
             exit(EXIT_FAILURE);
         }
-
+//service all the sockets with inputs pending//
         for (int i = 0; i < FD_SETSIZE; i++)
         {
-            if (FD_ISSET(i, &ready_sockets))
+            if (FD_ISSET(i, &read))
             {
-
+                        //connection request on orginal socket
                 if (i == sockfd)
                 {
                     int client_socket;
-
+                    
                     if ((client_socket = accept(sockfd, (struct sockaddr *)&their_addr,
                                                 (socklen_t *)&addr_size)) < 0)
                     {
                         perror("accept");
                         exit(EXIT_FAILURE);
                     }
-                    FD_SET(client_socket, &current_sockets);
+                    FD_SET(client_socket, &active);
                 }
                 else
                 {
+                    //data is arriving on an already connected socket
                     n = recv(i, buff, sizeof(buff), 0);
                     printf("\n%s\n", buff);
-                    FD_CLR(i, &current_sockets);
+                    close(i);
+                    FD_CLR(i, &active);
                 }
             }
         }
@@ -98,10 +100,9 @@ int main()
 
 
 //     while(1){
-//         int confd,i;
-// 			int ret=0;
-// 			char ip[17];
-// 			char filename[30];
+//     int Sconfd,i;
+// 	int ret=0;
+	
 //     addr_size = sizeof(their_addr);
 //     if(talkfd = accept(sockfd, (struct sockaddr *)&their_addr, (socklen_t *)&addr_size)<0){//errno -1 for socket err will cal that variable gloabaly
 //       printf("INIT_Server Accept failed...\n");

@@ -27,20 +27,9 @@ void *ServerT(void* a){
     
 while(1){
     sleep(3);//Sleep for a bit to allow the client to do stuff..a
-    printf("@INHERE\n");
-    addr_size = sizeof their_addr;
-    if(talkfd = accept(sockfd, (struct sockaddr *)&their_addr, &addr_size)<0){//errno -1 for socket err will cal that variable gloabaly
-      printf("INIT_Server Accept failed...\n");
-        continue;
-    }
-    printf("Connected to a client\n");
-    // inet_ntop(their_addr.ss_family,
-            // get_in_addr((struct sockaddr *)&their_addr),//this function gets the address of the device connecting
-            // s, sizeof s);
-        // printf("server: got connection from %s\n", s);
-
-Recieve(talkfd);
-close(talkfd);// Command exits as connection is finished..
+   
+Recieve();//ATM NO NEED TO CALL ANYTHING BECAUSE WE USE GLOBAL VAR RN
+// Command exits as connection is finished..
     //TODO simple messaging for DEV Please remove afterusage....
 }
 
@@ -160,28 +149,62 @@ return 0;
 
 
 
-void Recieve(int connfd)// delete after usage..
+void Recieve()// delete after usage..
 {
-    printf("in loop\n");
-    char buff[MAX];
+    
+    fd_set active, read;
+    addr_size=sizeof(their_addr);
+    // Initialize my current set
+    FD_ZERO(&active);
+    FD_SET(sockfd, &active);
+    int k=0;
     int n;
-    int f;
-    // infinite loop for chat
-   for(;;){
-    sleep(3);
-        bzero(buff, MAX);
-        // read the message from client and copy it in buffer
-       n= recv(connfd, buff, sizeof(buff), 0);
-                    printf("\n%s\n", buff);
-        // print buffer which contains the client contents
-        printf("From client: %s\t", buff);
-       
-        // if msg contains "Exit" then server exit and chat ended.
-        if (strncmp("exit", buff, 4) == 0) {
-            printf("Server Exit...\n");
-            return;
+            char buff[MAX]={0};
+
+        // TODO FIX THIS THINGY
+      while (1)
+    {
+     
+        read = active;
+
+        if (select(FD_SETSIZE, &read, NULL, NULL, NULL) < 0)
+        {
+            perror("Error");
+            exit(EXIT_FAILURE);
         }
-   }   
+//service all the sockets with inputs pending//
+        for (int i = 0; i < FD_SETSIZE; i++)
+        {
+            if (FD_ISSET(i, &read))
+            {
+                        //connection request on orginal socket
+                if (i == sockfd)
+                {
+                    int client_socket;
+                    
+                    if ((client_socket = accept(sockfd, (struct sockaddr *)&their_addr,
+                                                (socklen_t *)&addr_size)) < 0)
+                    {
+                        perror("accept");
+                        exit(EXIT_FAILURE);
+                    }
+                    FD_SET(client_socket, &active);
+                }
+                else
+                {
+                    //data is arriving on an already connected socket
+                    n = recv(i, buff, sizeof(buff), 0);
+                    printf("\n%s\n", buff);
+                    close(i);
+                    FD_CLR(i, &active);
+                }
+            }
+        }
+
+        if (k == (FD_SETSIZE * 2))
+            break;
+    }
+    return;
 }
 
 ////////////////////////////////////////////////////////////////////////////
