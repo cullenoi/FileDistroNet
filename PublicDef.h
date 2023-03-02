@@ -34,7 +34,7 @@ int Csockfd =99;//SOCKET FILE DESCRIPTOR returns -1 on errno
 	int rv = 99,rz =99;
 
 char usrname[20];
-int PORT;
+char * PORT;
 // #define MAX 80 Defined in server
 
 

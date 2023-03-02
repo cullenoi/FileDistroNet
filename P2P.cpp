@@ -32,7 +32,7 @@ int main(int argc, char const *argv[]){
     scanf("%s", usrname);
 
     printf("Enter your port number:");
-    scanf("%d", &PORT);
+    scanf("%s", PORT);
 
 pthread_mutex_init(&mutex,NULL);
 static pthread_t Serv;
@@ -86,7 +86,7 @@ int CreateServer()
 
    // TODO://
 //SIMPLE VERSION WILL NEED TO BE CHANGED DOWN THE LINE..
-   if( sockfd = socket(res->ai_family,res->ai_socktype,res->ai_protocol)!=0){ //Lets you choose TCP||UDP STREAM||DATAGRAM AI_INET||AI_INET6(Ip_addresse types..)
+   if((sockfd = socket(res->ai_family,res->ai_socktype,res->ai_protocol))!=0){ //Lets you choose TCP||UDP STREAM||DATAGRAM AI_INET||AI_INET6(Ip_addresse types..)
         fprintf(stderr,"INIT_Server getting socket: %s\n",gai_strerror(sockfd));
         return 1;//returning one as error check in main..
    }
@@ -116,7 +116,7 @@ int ListenA(){
     // BUT THE NEW ONE HANDLES SOLELY THE BACK AND FORTH WITH THIS CONN
 while(1){
     addr_size = sizeof their_addr;
-    if(talkfd = accept(sockfd, (struct sockaddr *)&their_addr, &addr_size)<0){//errno -1 for socket err will cal that variable gloabaly
+    if((talkfd = accept(sockfd, (struct sockaddr *)&their_addr, &addr_size))<0){//errno -1 for socket err will cal that variable gloabaly
       printf("INIT_Server Accept failed...\n");
         continue;
     }
@@ -221,7 +221,7 @@ int ClientCreate()
     }
 
 //create a socket from the info found 
-if( Csockfd = socket(Cres->ai_family,Cres->ai_socktype,Cres->ai_protocol)!=0){ //Lets you choose TCP||UDP STREAM||DATAGRAM AI_INET||AI_INET6(Ip_addresse types..)
+if((Csockfd = socket(Cres->ai_family,Cres->ai_socktype,Cres->ai_protocol))!=0){ //Lets you choose TCP||UDP STREAM||DATAGRAM AI_INET||AI_INET6(Ip_addresse types..)
         fprintf(stderr,"ERROR Client getting socket: %s\n",gai_strerror(Csockfd));
         return 1;//returning one as error check in main..
    }
