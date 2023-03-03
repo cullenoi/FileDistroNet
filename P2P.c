@@ -8,6 +8,17 @@
 //TODO: Clean up variables and get it to run...
 //TODO: Look at cmd line 
 //TODO URGENT  make a way of chosing which port number for multiple hosts...
+void process_buffer(char *buffer, int max_len)
+{//ADDS NULL TO END OF STRING 
+    for (int i = 0; i < max_len; i++)
+    {
+        if ((buffer[i] == '\n') || (buffer[i] == '\r'))
+        {
+            buffer[i] = '\0';
+            break;
+        }
+    }
+}
 pthread_mutex_t mutex;
 int err=0;
 void *ServerT(void* a){
@@ -289,23 +300,33 @@ if (connect(Csockfd, (struct sockaddr *)&Chints,sizeof Chints) == -1) {
 //             s, sizeof s);
     printf("client: connecting to %s\n", s);
 
-char buff[MAX];
-	int n;
-	for (;;) {
+unsigned long ha =(MAX);
 
-     
-		bzero(buff, sizeof(buff));
-		printf("Enter the string : ");
-		n = 0;
-		while ((buff[n++] = getchar()) != '\n')
-			;
-		send(Csockfd, buff, sizeof(buff),0);
-		bzero(buff, sizeof(buff));
-		if ((strncmp(buff, "exit", 4)) == 0) {
-			printf("Client Exit...\n");
-			break;
-		}
-	}
+    	int n;
+        char msg[2000] = {0};
+        char X[1024] = {0};
+
+	// 	char* name =(char*)malloc(sizeof(20));
+    // 	printf("Enter the string : \n");
+     char dummy;//dummy to enable terminal
+    printf("Enter your message:");
+    scanf("%c", &dummy); // a single newline character is kept from when the port number was read
+   
+    fgets(X, 1024, stdin);
+    process_buffer(X, 1024);
+    sprintf(msg, "[PORT:%d] says: %s", PORT, X); // format of data sent
+    // this gets sent to the buffer
+
+    send(Csockfd, msg, sizeof(buffer), 0); // send to the created socket
+    printf("\nMessage sent\n");
+	
+
+	// close the socket
+	close(Csockfd);
+
+
+
+ return 0;   
 	
 
 	// close the socket
