@@ -50,10 +50,9 @@ if (connect(Csockfd, (struct sockaddr *)&Chints,sizeof Chints) == -1) {
 
 unsigned long ha =(MAX);
 
-	int n;
+    	int n;
         char buffer[2000] = {0};
-
-	    char X[1024] = {0};
+        char X[1024] = {0};
 
 	// 	char* name =(char*)malloc(sizeof(20));
     // 	printf("Enter the string : \n");
