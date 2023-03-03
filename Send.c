@@ -51,14 +51,27 @@ if (connect(Csockfd, (struct sockaddr *)&Chints,sizeof Chints) == -1) {
 unsigned long ha =(MAX);
 
 	int n;
-	
+        char buffer[2000] = {0};
+
+	    char X[1024] = {0};
+
 	// 	char* name =(char*)malloc(sizeof(20));
     // 	printf("Enter the string : \n");
-    // scanf(" %19d", &name);  
-    char* name ="HI\0" ;
-        // name[20] ='\0';
-        send(Csockfd, name, sizeof(name), 0);
-	
+     char dummy;
+    printf("Enter your message:");
+    scanf("%c", &dummy); // a single newline character is kept from when the port number was read
+    // need newline character to be discarded
+
+    // scanf("%[^\n]s", hello); // newline character is the delimiter. That means we stop at newline.
+    //  I know fgets, so I replaced it
+    fgets(X, 1024, stdin);
+    process_buffer(X, 1024);
+    sprintf(buffer, "[PORT:%d] says: %s", PORT, X); // format of data sent
+    // this gets sent to the buffer
+
+    send(Csockfd, buffer, sizeof(buffer), 0); // send to the created socket
+    printf("\nMessage sent\n");
+    close(sock); // then immediately close
 	
 
 	// close the socket
@@ -68,3 +81,20 @@ unsigned long ha =(MAX);
 
  return 0;   
 }
+
+
+//  char dummy;
+//     printf("Enter your message:");
+//     scanf("%c", &dummy); // a single newline character is kept from when the port number was read
+//     // need newline character to be discarded
+
+//     // scanf("%[^\n]s", hello); // newline character is the delimiter. That means we stop at newline.
+//     //  I know fgets, so I replaced it
+//     fgets(hello, 1024, stdin);
+//     process_buffer(hello, 1024);
+//     sprintf(buffer, "%s[PORT:%d] says: %s", name, PORT, hello); // format of data sent
+//     // this gets sent to the buffer
+
+//     send(sock, buffer, sizeof(buffer), 0); // send to the created socket
+//     printf("\nMessage sent\n");
+//     close(sock); // then immediately close
