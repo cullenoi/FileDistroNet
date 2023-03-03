@@ -1,9 +1,9 @@
 #include "PublicDef.h"
+#include <stdio.h>
 
 int main(){
 
 
-    char buffer[2000] = {0};
     // Fetching port number
     int PORT_server;
 
@@ -45,13 +45,16 @@ if (connect(Csockfd, (struct sockaddr *)&Chints,sizeof Chints) == -1) {
 //             s, sizeof s);
     printf("client: connecting to %s\n", s);
 
-char* buff[MAX];
-buff[MAX] = '\0';
+
+
+
 unsigned long ha =(MAX);
 
-	int n;
-	
+    	int n;
+        char buffer[2000] = {0};
+        char X[1024] = {0};
 
+<<<<<<< HEAD
      
 		bzero(buff, sizeof(buff));
 		printf("Enter the string : ");
@@ -63,6 +66,25 @@ unsigned long ha =(MAX);
         bzero(buff, sizeof(buff));
 	
 	
+=======
+	// 	char* name =(char*)malloc(sizeof(20));
+    // 	printf("Enter the string : \n");
+     char dummy;
+    printf("Enter your message:");
+    scanf("%c", &dummy); // a single newline character is kept from when the port number was read
+    // need newline character to be discarded
+
+    // scanf("%[^\n]s", hello); // newline character is the delimiter. That means we stop at newline.
+    //  I know fgets, so I replaced it
+    fgets(X, 1024, stdin);
+    process_buffer(X, 1024);
+    sprintf(buffer, "[PORT:%d] says: %s", PORT, X); // format of data sent
+    // this gets sent to the buffer
+
+    send(Csockfd, buffer, sizeof(buffer), 0); // send to the created socket
+    printf("\nMessage sent\n");
+    close(sock); // then immediately close
+>>>>>>> 1ff1c6e34019d3d0fb2d79b6fe6d666e14bdd987
 	
 
 	// close the socket
@@ -72,3 +94,20 @@ unsigned long ha =(MAX);
 
  return 0;   
 }
+
+
+//  char dummy;
+//     printf("Enter your message:");
+//     scanf("%c", &dummy); // a single newline character is kept from when the port number was read
+//     // need newline character to be discarded
+
+//     // scanf("%[^\n]s", hello); // newline character is the delimiter. That means we stop at newline.
+//     //  I know fgets, so I replaced it
+//     fgets(hello, 1024, stdin);
+//     process_buffer(hello, 1024);
+//     sprintf(buffer, "%s[PORT:%d] says: %s", name, PORT, hello); // format of data sent
+//     // this gets sent to the buffer
+
+//     send(sock, buffer, sizeof(buffer), 0); // send to the created socket
+//     printf("\nMessage sent\n");
+//     close(sock); // then immediately close
