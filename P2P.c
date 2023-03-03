@@ -38,8 +38,7 @@ void *ServerT(void* a){
     
 while(1){
     sleep(3);//Sleep for a bit to allow the client to do stuff..a
-   
-Recieve();//ATM NO NEED TO CALL ANYTHING BECAUSE WE USE GLOBAL VAR RN
+    Recieve();//ATM NO NEED TO CALL ANYTHING BECAUSE WE USE GLOBAL VAR RN
 // Command exits as connection is finished..
     //TODO simple messaging for DEV Please remove afterusage....
 }
@@ -54,6 +53,9 @@ Recieve();//ATM NO NEED TO CALL ANYTHING BECAUSE WE USE GLOBAL VAR RN
 int main(int argc, char const *argv[]){
 
 
+///////////////////////////////////////////////////////////////// 
+//Server Section:
+//////////////////////////////////////////////////////////////////
 pthread_mutex_init(&mutex,NULL);
 static pthread_t Serv;
 int fail;
@@ -69,8 +71,9 @@ if(xy){
     printf("@Thread ERROR\n");
     exit(-1);
 }
-int ch; //TODO STOLEN!!!
-printf("\n*****At any point in time press the following:*****\n1.Send message\n0.Quit\n");
+int ch; 
+
+printf("\nPlease Select the following options: >>>\n1.Publish File\n0.Quit\n Or ..Wait\n");
     printf("\nEnter choice:");
 
     do
@@ -88,29 +91,12 @@ printf("\n*****At any point in time press the following:*****\n1.Send message\n0
             printf("\nWrong choice\n");
         }
     } while (ch);
-//While that thread is runnign the client will take center stage...
-
-// fail = ClientCreate();
-// if(fail != 0 ){
-//         printf("Error on Client End see errors:\n");
-//     }
-// else 
-// printf("Ended fairly in love and war :)!\n");
-
 pthread_join(Serv,NULL);
 
 pthread_mutex_destroy(&mutex);
     return 0;
 
 }
-
-
-
-//////////////////////////////////////////////////
-///SERVER FUNCTIONS/////////////////////////
-
-
-
 
 int Server()
 {
@@ -203,9 +189,21 @@ void Recieve()// delete after usage..
                 }
                 else
                 {
+                    int rec_PORT = 0;
                     //data is arriving on an already connected socket
                     n = recv(i, buff, sizeof(buff), 0);
-                    printf("\n%s\n", buff);
+                    //Take
+                    //Recieved buffer and parse first part;
+                    if(REC_PORT == PORT)//Meant to be here 
+                    {
+                        add_file();
+                    }
+                    else
+                    {
+                        int NEXT_PORT = 0;
+                        NEXT_PORT = ShortestPath(REC_PORT); //FIND NEXT BEST PLACE TO MOVE ON
+                        ClientCreate(NEXT_PORT,buff);//send it to this address and next port.
+                    }
                     close(i);
                     FD_CLR(i, &active);
                 }
@@ -218,41 +216,7 @@ void Recieve()// delete after usage..
     return;
 }
 
-////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////CLIENT FUNCTIONS/////////////////////////
-#include"Client.h"
-#include "PublicDef.h"
-
-//REMOVE SOON....
-
-// void *get_in_addr(struct sockaddr *sa)
-// {
-//     if (sa->sa_family == AF_INET) {
-//         return &(((struct sockaddr_in*)sa)->sin_addr);
-//     }
-
-//     return &(((struct sockaddr_in6*)sa)->sin6_addr);
-// }
-// void Send(int FUCKfd)// Simple chat program which generates a string and sends it.
-// {
-	// char buff[MAX];
-	// int n;
-	// for (;;) {
-
-     
-	// 	bzero(buff, sizeof(buff));
-	// 	printf("Enter the string : ");
-	// 	n = 0;
-	// 	while ((buff[n++] = getchar()) != '\n')
-	// 		;
-	// 	send(FUCKfd, buff, sizeof(buff),0);
-	// 	bzero(buff, sizeof(buff));
-	// 	if ((strncmp(buff, "exit", 4)) == 0) {
-	// 		printf("Client Exit...\n");
-	// 		break;
-	// 	}
-	// }
-// }
+////////////Client Functions://///////////////////////////////////////////////////////////////
 
 int ClientCreate()
 {
