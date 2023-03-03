@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "P2P.C": "cpp"
+        "P2P.C": "cpp",
+        "vector": "cpp",
+        "iostream": "cpp"
     }
 }

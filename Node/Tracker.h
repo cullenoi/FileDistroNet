@@ -4,7 +4,7 @@
 #include <vector>
 // simulated package of data.
 typedef struct dataset{
-    int file;
+    int id;
     int seg;
     char * data;
 } dataset;
@@ -13,11 +13,12 @@ typedef struct dataset{
 typedef struct node{
     int id;
     node * next;
+    node * q_next;
 } node;
 
 // list of connections between nodes in the network
 typedef struct edge{
-    node * n;
+    int id;
     int weight;
     edge * e_next;
 } edge;
@@ -40,6 +41,6 @@ int rendezvous(int file_key, int file_seg, node * head);
 // hash function develops a int based on input parameters... aim to be as distributed as possible among all possible outcomes...
 int hash(int key, int seg, int node);
 
-#endif MODULE_TRACKER
+#endif
 
 /*** end of file ***/

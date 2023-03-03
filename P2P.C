@@ -12,6 +12,7 @@
 #include <unistd.h> // read(), write(), close()
 #include <pthread.h>
 
+#include "Node/Node.h"
 
 #define MAX 80
 #define PORT 8080
@@ -37,7 +38,14 @@ void* Client(void* b){
 
 }
 
-int main(){
+int main(int argc, char *argv[]){
+	Node node;
+	if(!node.init_node(*argv)){
+		printf("Err in init node (port id: %i)\n", argv[1]);
+	}
+
+
+
 static pthread_t client,server;
 	long rc;
 
