@@ -18,10 +18,11 @@ class Node {
         dataset * data;
         dataset * file;
         int file_list[100];
+        int * map;
         //book_date: yy/mm/dd/hh/mm/ss/..
         unsigned book_date;
     public:
-    //comstructs node
+        //constructs node
         Node(){
 
             address = 0;
@@ -38,28 +39,39 @@ class Node {
 
             file->id = 0;
             file->seg = 0;
+            file->next = NULL;
+            file->word = (char*)malloc(MX_STR_LEN * sizeof(char));
 
-            file->data = (char*)malloc(MX_STR_LEN * sizeof(char));
+            data->next = NULL;
+
+            map = (int*)malloc(nList_size * sizeof(int));
 
             book_date = 0;
 
         }
+        // initialise node
+        int init_node(char * argv[]);
+        // load nod info intoc correct attributes
+        int load_node_info (char *fname);
         //loads the vertices from the CSV file of name fname
         node * load_nodes (char *fname); 
         //loads the edges from the CSV file of name fname
-        edge ** load_edges (char *fname);  
-        int init_node(char * argv[]);
-        int load_node_info (char *fname);
-        
+        edge ** load_edges (char *fname);
 
         int book_update(int node_id, int action);
-        int BellmanFort();
+        
+        int share_file();
+
+        int add_file(char * dataseg);
+
+        // getters 
 
         unsigned get_address();
         node * get_node_list();
         edge ** get_edge_list();
+        dataset * get_file();
+        dataset * get_data_list();
 
-        void set_name(char * name);
 };
 
 #endif

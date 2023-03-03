@@ -69,8 +69,9 @@ int Node::load_node_info(char *fname){
         printf("Imported File id: %i\n", file->id);
         // file data
         token = strtok(NULL, "\n");
-        strcpy(file->data, token);
-        printf("Imported Dataset: %s\n", file->data);
+        file->char_count = strlen(token);
+        strcpy(file->word, token);
+        printf("Imported Dataset: %s\n", file->word);
         break;
     }
     if(!file->id) return 0;
@@ -85,6 +86,7 @@ node * Node::load_nodes (char *fname){
     fgets(row, MX_STR_LEN, csv);
     node * N = (node*)malloc(sizeof(node));
     node * temp, * head = N;
+    head->next = NULL;
     // go though the file and add all nodes to the list.
     while(!feof(csv)){
         node * N = (node*)malloc(sizeof(node));
@@ -146,7 +148,7 @@ edge ** Node::load_edges (char *fname){
             }
             token = strtok(NULL, ",");
         }
-        printf("Edge: %i <-> %i\n", D1->id, D2->id);
+        //printf("Edge: %i <-> %i\n", D1->id, D2->id);
     }
     printf("Loaded edges\n");
     return &(EdgeList[0]);
@@ -178,76 +180,86 @@ int Node::book_update(int node_id, int action){
     }
     printf("Nodes updated\n");
     return 1;
+}  
+
+int Node::add_file(char * dataseg){ 
+    //create new data package...
+    dataset * new_data = (dataset*)malloc(sizeof(dataset));
+    new_data->word = (char*)malloc(MX_STR_LEN * sizeof(char));
+    if(data){
+        // add datagram to the list of data
+        new_data->next = data;
+    }
+    data = new_data;
+    // parse msg
+    char * parse = strtok(dataseg, ".");
+    printf("Adding file to node %s..", parse);
+    // read in file ID
+    parse = strtok(NULL, ".");
+    data->id = atoi(parse);
+    // read in seg ID
+    parse = strtok(NULL, ".");
+    data->seg = atoi(parse);
+    // read in data
+    parse = strtok(NULL, "\0");
+    strcpy(data->word, parse);
+
+    printf(" file read in\n");
+
+    return 1;
+
 }
 
-/*
-int Node::Bellman_Ford(){
+int Node::share_file(){
+    // parse the file into x amount of pieces.
+    printf("create data packets\n");
+    int seg = 100;
+    int num_of_segs = 10;
+    int seg_size = file->char_count/num_of_segs;
+    int index = 0;
+    for(int i=0; i<num_of_segs; i++){
 
-            int i,k,dist[num_nodes],S,flag=1;
-            node * curr = address_book;
-            node * u, * v;
-            edge * edge_curr = head;
+        string msg;
+        msg = msg + to_string(rendezvous(file->id, (seg+i),
+                              address_book, address));
+        // cout << msg << endl;
+        msg = msg + "." + to_string(file->id);
+        // cout << msg << endl;
+        msg = msg + "." + to_string(seg + i) + ".";
+        //cout << msg << endl;
 
-            /* set every dist to node to inf.
-            complete this step during init of node...
-            while(curr){
-                if(curr->id == address){
-                    curr->dist = 0;
-                }
-                else{
-                    curr->dist = 10000;
-                    curr = curr->next;
-                }
-            }
-            
-            while(curr){
-                while(edge_curr){
-                    // u = edge_curr->id1;
-                    // v = edge_curr->id2;
-                    //find u and v
-                    node * node_curr = address_book;
-                    // run through node list and find two edge nodes...
-                    while(curr){
-                        if(curr->id == edge_curr->id1) u = node_curr;
-                        if(curr->id == edge_curr->id2) v = node_curr;
-                        node_curr = curr->next;
-                    }
-                    // check if the dist through node u is shorter than the current route...
+        // read in data
 
-                    //TODO: implement a vector table for routing
-                    if(u->dist + );
-                    edge_curr = edge_curr->next;
-                }
-                curr = curr->next;
+        if(i == num_of_segs-1){
+            for(int j=index; j<file->char_count; j++){
+                msg = msg + file->word[j];
             }
-            
-            for(i=0;i<V-1;i++){
-                for(k=0;k<E;k++){
-                    u = edge[k][0];
-                    v = edge[k][1];
-                    if(distance[u]+G[u][v] < distance[v])
-                        distance[v] = distance[u] + G[u][v];
-                }
-            }
-            for(k=0;k<E;k++){
-                u = edge[k][0];
-                v = edge[k][1] ;
-                if(distance[u]+G[u][v] < distance[v])
-                flag = 0 ;
-                }
-            return flag;
+            index = index + seg_size;
+            cout << msg << endl;
         }
-*/       
+        else{
+            for(int j=index; j<index+seg_size; j++){
+                msg = msg + file->word[j];
+            }
+            index = index + seg_size;
+            cout << msg << endl;
+        }
+        
+    }
+    // special case final seg.
+
+
+    return 1;
+}
 
 // getters
 
 unsigned Node::get_address(){return address;}
 node * Node::get_node_list(){return address_book;}
 edge ** Node::get_edge_list(){return edge_list;}
+dataset * Node::get_file(){return file;}
+dataset * Node::get_data_list(){return data;}
 
-// setters
-
-void Node::set_name(char * new_name){ name = new_name;}
 
 int main(int argc, char *argv[]){
 	Node N1;
@@ -260,27 +272,46 @@ int main(int argc, char *argv[]){
     edge ** e_arr = (N1.get_edge_list());
     edge * e_head;
 
-    while(curr){
-        printf("Port: %i\n", curr->id);
-        // printf("Connections:\n");
-        // e_head = *(e_arr + curr->id);
-        // while(e_head){
-        //     printf(" -> %i", e_head->id);
-        //     e_head = e_head->e_next;
-        // }
-        // printf("\n");
-        curr = curr->next;
+    // while(curr){
+    //     printf("Port: %i\n", curr->id);
+    //     // printf("Connections:\n");
+    //     // e_head = *(e_arr + curr->id);
+    //     // while(e_head){
+    //     //     printf(" -> %i", e_head->id);
+    //     //     e_head = e_head->e_next;
+    //     // }
+    //     // printf("\n");
+    //     curr = curr->next;
+    // }
+    if(!N1.share_file()){
+        printf("err: sharing file\n");
     }
-    int start, end;
-    printf("shortest path proof\n");
-    cout << "Start Node: ";
-    cin >> start;
-    cout << "End Node: ";
-    cin >> end;
     
-    shortest_path(start, end, N1.get_edge_list(), N1.get_node_list());
-
-
+    int end;
+    printf("\nshortest path proof\n\n");
+    cout << "Destination: ";
+    cin >> end;
+    if(end == N1.get_address()){
+        printf("Already at node\n");
+    }
+    else{
+        int next_hop;
+        list = N1.get_node_list();
+        while(1){
+            if(list->id == end){
+                next_hop = shortest_path(N1.get_address(), end, 
+                            N1.get_edge_list(), N1.get_node_list());
+                printf("Next Hop: %i\n", next_hop);
+                break;
+            }
+            list = list->next;
+            if(list == NULL){
+                printf("Port node found in list of known ports!\n");
+                break;
+            }
+        }
+    }
+   
     return 0;
 }
 
