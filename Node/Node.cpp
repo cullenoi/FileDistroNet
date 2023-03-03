@@ -3,6 +3,7 @@
 #include <string>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "Tracker.h"
 #include "Node.h"
@@ -36,10 +37,12 @@ int Node::init_node(char * argv[]){
         printf("Err loading node info\n");
         return 0;
     }
-    printf("Loadinf nodes.. \n");
+    printf("Loading nodes.. \n");
     address_book = load_nodes(argv[3]);
-    printf("loading edges...\n");
+    printf("Loading edges...\n");
     edge_list = load_edges(argv[4]);
+    printf("Loading list of files...\n");
+    load_files(argv[5]);
     return 1;
 }
 
@@ -154,6 +157,20 @@ edge ** Node::load_edges (char *fname){
     return &(EdgeList[0]);
 } 
 
+void Node::load_files(char *fname){
+    FILE * csv = fopen(fname, "r");
+    char row[MX_STR_LEN];
+    fgets(row, MX_STR_LEN, csv);
+    int index = 0;
+    while(!feof(csv)){
+        file_list[index] = atoi(row);
+        // printf("file added: %i\n", atoi(row));
+        index++;
+        fgets(row, MX_STR_LEN, csv);
+    }
+    printf("Loaded files\n");
+}
+
 int Node::book_update(int node_id, int action){
     // action = 1 -> add, action = 0 -> remove
     if(action){
@@ -253,6 +270,33 @@ int Node::share_file(){
 }
 
 // getters
+
+char * Node::return_file_seg(int dest_port, int file_id, int file_seg){
+    dataset * curr = data;
+    char data_seg[MX_STR_LEN];
+    char buffer[MX_STR_LEN];
+    while(curr){
+        if(curr->id == file_id && curr->seg == file_seg){
+            // build msg.
+            sprintf(buffer, "%i", dest_port);
+            strcat(data_seg,buffer);
+            strcat(data_seg, ".");
+            sprintf(buffer, "%i", curr->id);
+            strcat(data_seg, buffer);
+            strcat(data_seg, ".");
+            sprintf(buffer, "%i", curr->seg);
+            strcat(data_seg, buffer);
+            strcat(data_seg, ".");
+            strcpy(buffer, curr->word);
+            strcat(data_seg, buffer);
+            return data_seg;
+        }
+        curr = curr->next;
+    }
+    printf ("No data seg found!\n");
+    return NULL;
+
+}
 
 unsigned Node::get_address(){return address;}
 node * Node::get_node_list(){return address_book;}

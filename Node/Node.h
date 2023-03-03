@@ -57,6 +57,10 @@ class Node {
         node * load_nodes (char *fname); 
         //loads the edges from the CSV file of name fname
         edge ** load_edges (char *fname);
+        // loads list of available files
+        void load_files (char * fname);
+        // get segment of file from data bank
+        char * return_file_seg(int dest_port, int file_id, int file_seg);
 
         int book_update(int node_id, int action);
         
