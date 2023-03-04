@@ -37,7 +37,7 @@ int Csockfd =99;//SOCKET FILE DESCRIPTOR returns -1 on errno
 char usrname[20];
 int PORT;
 // #define MAX 80 Defined in server
-
+void FileDistro();
 
 
 
