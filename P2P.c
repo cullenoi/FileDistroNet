@@ -82,7 +82,7 @@ printf("\nPlease Select the following options: >>>\n1.Publish File\n0.Quit\n Or 
         switch (ch)
         {
         case 1:
-            ClientCreate();
+            FileDistro();
             break;
         case 0:
             printf("\nLeaving\n");
@@ -196,14 +196,14 @@ void Recieve()// delete after usage..
                     //Recieved buffer and parse first part;
                     if(REC_PORT == PORT)//Meant to be here 
                     {
-                        add_file();
+                        add_file();//THis adds the file to a piece of memory like a pointer (NODES.CPP)
                     }
                     else
                     {
                         int NEXT_PORT = 0;
                         NEXT_PORT = ShortestPath(REC_PORT); //FIND NEXT BEST PLACE TO MOVE ON
                         ClientCreate(NEXT_PORT,buff);//send it to this address and next port.
-                    }
+                    }//
                     close(i);
                     FD_CLR(i, &active);
                 }
@@ -218,13 +218,13 @@ void Recieve()// delete after usage..
 
 ////////////Client Functions://///////////////////////////////////////////////////////////////
 
-int ClientCreate()
+int ClientCreate(int PORT_server,char *buffer)
 {
 
 
-    char buffer[2000] = {0};
-    // Fetching port number
-    int PORT_server;
+    // char buffer[2000] = {0};
+    // // Fetching port number
+    // int PORT_server;
 
     // IN PEER WE TRUST
     printf("Enter the port to send message:"); // Considering each peer will enter different port
@@ -296,4 +296,21 @@ unsigned long ha =(MAX);
 	// close the socket
 	close(Csockfd);
 	return 0;
+}
+
+void FileDistro(int Neighbour[]){//Generates the list of files and sends them
+   int i = 0;
+    ///File splitting happens here and the mesage in
+    // the form of 111.1407."arg" should be in the char * message or whatever works...
+// //TODO I need to look into how this actually seperates Realistically I'm thinking we call 
+// the function which splits the array string into the 10 pieces and then we're just calling in the string splitting it and doiung th 
+// NEXT PATH ALGO  
+
+char *message;
+
+   while(Neighbour[i] != NULL){// Cycle through array of int till NONE LEFT
+// I need to look into how this actually seperates Realistically 
+    ClientCreate(Neighbour[i],message);
+    i++;
+   }
 }
