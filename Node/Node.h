@@ -11,7 +11,7 @@
 class Node {
 
     private:
-        int address;
+        unsigned address;
         char * name;
         node * address_book;
         edge ** edge_list;
@@ -70,7 +70,7 @@ class Node {
 
         // getters 
 
-        int get_address();
+        unsigned get_address();
         node * get_node_list();
         edge ** get_edge_list();
         dataset * get_file();

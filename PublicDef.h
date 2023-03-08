@@ -16,18 +16,17 @@
 #include <sys/select.h>
 
  int sockfd , talkfd ;//SOCKET FILE DESCRIPTOR returns -1 on errno
-    struct sockaddr_in hints;
-    struct sockaddr_in their_addr;
-    socklen_t addr_size;
-// #define PORT "3490"  // the port users will be connecting to
-// #define PORTC "3490"
+ struct sockaddr_in hints;
+ struct sockaddr_in their_addr;
+ socklen_t addr_size;
+
 #define _SS_PAD1SIZE 3000
 #define BACKLOG 10   // how many pending connections queue will hold
 #define MAX 80
 #define SA struct sockaddr
 /////////server side//
 
-/// @brief CLIENT SIDE/////
+/// @brief CLIENT SIDE///// These could be made simply as called in function noneeed fr global
 int Csockfd =99;//SOCKET FILE DESCRIPTOR returns -1 on errno
     struct sockaddr_in Chints;// was using the addrinfo but doesnt work for single networking..
     char s[INET6_ADDRSTRLEN];
@@ -39,9 +38,8 @@ int PORT;
 // #define MAX 80 Defined in server
 void FileDistro();
 
+int PortParser(char *buff);
 
-
-    
 
 
 #endif 

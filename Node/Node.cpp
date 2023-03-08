@@ -298,7 +298,7 @@ char * Node::return_file_seg(int dest_port, int file_id, int file_seg){
 
 }
 
-int Node::get_address(){return address;}
+unsigned Node::get_address(){return address;}
 node * Node::get_node_list(){return address_book;}
 edge ** Node::get_edge_list(){return edge_list;}
 dataset * Node::get_file(){return file;}
