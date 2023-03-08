@@ -253,14 +253,11 @@ void Recieve(Node X)// delete after usage..
 int ClientCreate(int PORT_server,char *buffer)
 {
 
-
-    // char buffer[2000] = {0};
-    // // Fetching port number
-    // int PORT_server;
-
-    // IN PEER WE TRUST
-    printf("Enter the port to send message:"); // Considering each peer will enter different port
-    scanf("%d", &PORT_server);
+int Csockfd =99;//SOCKET FILE DESCRIPTOR returns -1 on errno
+    struct sockaddr_in Chints;// was using the addrinfo but doesnt work for single networking..
+    char s[INET6_ADDRSTRLEN];//have it as length ipv6 incase good practise
+    int yes =99;//DEFINING RANDOM NUMBERS
+	int rv = 99,rz =99;
 
     int sock = 0, valread;
     struct sockaddr_in serv_addr;
@@ -279,13 +276,13 @@ if( (Csockfd = socket(AF_INET,SOCK_STREAM,0))<0){ //Lets you choose TCP||UDP STR
         return 1;//returning one as error check in main..
    }
 int force =1;
- if (setsockopt(Csockfd, SOL_SOCKET,SO_REUSEADDR, &force, sizeof(force)))//FORCES THIS SOCKET FD TO THE PORT
+ if (setsockopt(Csockfd, SOL_SOCKET,SO_REUSEADDR, &force, sizeof(force)))//FORCES THIS SOCKET FileDESC TO THE PORT
     {
         perror("setsockopt");
         exit(EXIT_FAILURE);
     }
 
-if (connect(Csockfd, (struct sockaddr *)&Chints,sizeof Chints) == -1) {
+if (connect(Csockfd, (struct sockaddr *)&Chints,sizeof Chints) == -1) {//connecting
             close(Csockfd);
             perror("ERROR client: connect");
 			return 1;
@@ -305,29 +302,21 @@ unsigned long ha =(MAX);
 	// 	char* name =(char*)malloc(sizeof(20));
     // 	printf("Enter the string : \n");
      char dummy;//dummy to enable terminal
-    printf("Enter your message:");
-    scanf("%c", &dummy); // a single newline character is kept from when the port number was read
+    printf("Sending message:%s\n",buffer);
    
-    fgets(X, 1024, stdin);
-    process_buffer(X, 1024);
-    sprintf(msg, "[PORT:%d] says: %s", PORT, X); // format of data sent
+    process_buffer(buffer, MAX);//adds the \0 instaed of \n 
+    // sprintf(msg, buffer); // format of data not entirely nesicary if we have enough spac in first array
+    //Basically puts the string csv into this message and adds a \0 to make sure it sends correct.
     // this gets sent to the buffer
 
-    send(Csockfd, msg, sizeof(buffer), 0); // send to the created socket
+    send(Csockfd, buffer, sizeof(buffer), 0); // send to the created socket
     printf("\nMessage sent\n");
 	
 
 	// close the socket
 	close(Csockfd);
-
-
-
  return 0;   
 	
-
-	// close the socket
-	close(Csockfd);
-	return 0;
 }
 //NOTE SHOULD PASS IN NODE ADDRESSLIST
 void FileDistro(int Neighbour[]){//Generates the list of files and sends them
