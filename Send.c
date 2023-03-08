@@ -1,6 +1,18 @@
 #include "PublicDef.h"
 #include <stdio.h>
 
+
+void process_buffer(char *buffer, int max_len)
+{//ADDS NULL TO END OF STRING 
+    for (int i = 0; i < max_len; i++)
+    {
+        if ((buffer[i] == '\n') || (buffer[i] == '\r'))
+        {
+            buffer[i] = '\0';
+            break;
+        }
+    }
+}
 int main(){
 
 
@@ -69,7 +81,7 @@ unsigned long ha =(MAX);
 =======
 	// 	char* name =(char*)malloc(sizeof(20));
     // 	printf("Enter the string : \n");
-     char dummy;
+     char dummy;//dummy to enable terminal
     printf("Enter your message:");
     scanf("%c", &dummy); // a single newline character is kept from when the port number was read
     // need newline character to be discarded
