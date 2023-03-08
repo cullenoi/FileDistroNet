@@ -194,13 +194,13 @@ int shortest_path(int startNode, int endNode, edge ** e_list, node * n_list){
 void free_memory ( void ) {
     edge * curr, * temp;
     free(q);
-    for(int i=0; i<nList_size; i++){
-        free(N_List[i]);
-        // curr = EdgeList[i];
-        // while(curr){
-        //     temp = curr;
-        //     curr = curr->e_next;
-        //     free(temp);
-        // }
-    }
+    // for(int i=0; i<nList_size; i++){
+    //     free(N_List[i]);
+    //     // curr = EdgeList[i];
+    //     // while(curr){
+    //     //     temp = curr;
+    //     //     curr = curr->e_next;
+    //     //     free(temp);
+    //     // }
+    // }
 }

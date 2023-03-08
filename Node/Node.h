@@ -67,7 +67,7 @@ class Node {
         char * share_file(dataset * file, int seg, int seg_size, int index,
                           node * node_list, int address);
 
-        int add_file(char * dataseg);
+        int add_file(char * dataseg, dataset * data_file);
 
         // getters 
 

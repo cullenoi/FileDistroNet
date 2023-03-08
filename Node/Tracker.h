@@ -27,9 +27,11 @@ typedef struct edge{
 
 //Network Struct
 typedef struct NETWORK{
-    node * N;
-    edge ** E;
+    int PORT;
+    dataset * datafile;
 } NETWORK;
+
+
 
 // add a node to the node list
 void list_add(node * new_node, node * head);

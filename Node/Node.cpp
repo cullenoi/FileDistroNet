@@ -203,30 +203,30 @@ int Node::book_update(int node_id, int action){
     return 1;
 }  
 
-int Node::add_file(char * dataseg){ 
+int Node::add_file(char * dataseg, dataset * data_file){ 
     //create new data package...
     dataset * new_data = (dataset*)malloc(sizeof(dataset));
     new_data->word = (char*)malloc(MX_STR_LEN * sizeof(char));
-    if(data){
+    if(data_file){
         // add datagram to the list of data
-        new_data->next = data;
+        new_data->next = data_file;
     }
-    data = new_data;
+    data_file = new_data;
     char * parse = (char*)malloc(MX_STR_LEN * sizeof(char));
     // parse msg
     parse = strtok(dataseg, ".");
     printf("Adding file to node %s..", parse);
     // read in file ID
     parse = strtok(NULL, ".");
-    data->id = atoi(parse);
+    data_file->id = atoi(parse);
     // read in seg ID
     parse = strtok(NULL, ".");
-    data->seg = atoi(parse);
+    data_file->seg = atoi(parse);
     // read in data
     parse = strtok(NULL, "\0");
-    strcpy(data->word, parse);
+    strcpy(data_file->word, parse);
 
-    printf(" file read in\n");
+    printf(" file read in\n\n\n");
 
     return 1;
 
@@ -236,35 +236,42 @@ char * Node::share_file(dataset * file, int seg, int seg_size, int index,
                         node * node_list, int address){
     // parse the file into x amount of pieces.
     printf("create data packet: %i\n", seg);
-
     char point = '.';
     char * msg = (char*)malloc(MX_STR_LEN * sizeof(char));
+    if(msg ==NULL){
+        printf("ERROR IN MSG L242\n");
+    }
     //memset(msg, 0, strlen(msg));//sets to null
     char * int_char = (char*)malloc(10*sizeof(char));
+    if(int_char==NULL){
+        printf("ERROR MEM L248\n");
+    }
+    memset(int_char,0,10*sizeof(char));
+    memset(msg,0,sizeof(char)*MX_STR_LEN);
     //FIXME
+    //printf("%i, %i, %i, %i\n", file->id, seg, address, index);
     int dest_port = rendezvous(file->id, seg, node_list, address);
-
     sprintf(int_char, "%d", dest_port);
     strcat(msg, int_char);
     strcat(msg, &point);
-    printf("%s\n", msg);
+    //printf("%s\n", msg);
     // cout << msg << endl;
     sprintf(int_char, "%d", file->id);
     strcat(msg, int_char);
     strcat(msg, &point);
-    printf("%s\n", msg);
+    //printf("%s\n", msg);
     // cout << msg << endl;
     sprintf(int_char, "%d", seg);
     strcat(msg, int_char);
     strcat(msg, &point);
-    printf("%s\n", msg);
+    //printf("%s\n", msg);
     //cout << msg << endl;
 
     // // read in data
     //char * buffer = (char*)malloc(seg_size * sizeof(char));
     char buffer;
     char end = '\0';
-    printf("%s\n", msg);
+    //printf("%s\n", msg);
     if(seg == 109){
         int i = 0;
         for(int j=index; j<file->char_count; j++){
@@ -272,7 +279,8 @@ char * Node::share_file(dataset * file, int seg, int seg_size, int index,
             strcat(msg, &buffer);
         }
         strcat(msg, &end);
-        printf("%s\n", msg);
+        //printf("%s\n", msg);
+        free(int_char);
         return msg;
     }
     else{
@@ -281,10 +289,11 @@ char * Node::share_file(dataset * file, int seg, int seg_size, int index,
             strcat(msg, &buffer);
         }
         strcat(msg, &end);
-        printf("%s\n", msg);
+        //printf("%s\n", msg);
+        free(int_char);
         return msg;
     }
-
+    
     }
     // special case final seg.
 

@@ -24,12 +24,16 @@ node * curr;
 edge ** e_arr;
 edge * e_head;
 
-// TODO: make a thread for server run and call variables.
-//TODO: Look into Gloabalisation and resetting variables (might be easier to just use sep var names and reuse the struscts)
- 
-//TODO: Clean up variables and get it to run...
-//TODO: Look at cmd line 
-//TODO URGENT  make a way of chosing which port number for multiple hosts...
+
+typedef struct argy {
+    int portptr;
+    dataset * data_file;
+    node * node_list;
+    edge ** edge_list;
+} argy;
+
+
+
 // void process_buffer(char *buffer, int max_len)
 // {//ADDS NULL TO END OF STRING 
 //     for (int i = 0; i < max_len; i++)
@@ -43,9 +47,14 @@ edge * e_head;
 // }
 pthread_mutex_t mutex;
 int err=0;
-void *ServerT(void* a){
-   
-     if(listen(sockfd,BACKLOG)<0)//-1 = errno
+void *ServerT( void* A){
+    printf("IN server\n");
+    argy *B = (argy *)A;
+    int addr= B->portptr;
+     node * node_list = B->node_list;
+    edge ** edge_list = B->edge_list; 
+    dataset* data_file = B->data_file;
+    if(listen(sockfd,BACKLOG)<0)//-1 = errno
     {
         printf("INIT_Server socket Listening failed...\n");
         return 0;
@@ -60,11 +69,12 @@ void *ServerT(void* a){
     
 while(1){
     sleep(3);//Sleep for a bit to allow the client to do stuff..a
-    Recieve();//ATM NO NEED TO CALL ANYTHING BECAUSE WE USE GLOBAL VAR RN
+    Recieve(addr, data_file, node_list, edge_list);//ATM NO NEED TO CALL ANYTHING BECAUSE WE USE GLOBAL VAR RN
 // Command exits as connection is finished..
     //TODO simple messaging for DEV Please remove afterusage....
     }
     printf("all is well! :))\n");
+    free(B);
     return 0;
 }
 
@@ -84,10 +94,17 @@ int main(int argc, char *argv[]){
     edge ** e_arr = (N1.get_edge_list());
     edge * e_head;
     PORT = N1.get_address();//GLOBALLY SETS PORT NUMBER 
+    printf("Server thread start\n");
 ///////////////////////////////////////////////////////////////// 
 //Server Section:
 //////////////////////////////////////////////////////////////////
 pthread_mutex_init(&mutex,NULL);
+ argy A ;    //= (argy*)malloc(sizeof(argy));
+int my_port = N1.get_address();
+(A.portptr) = my_port;
+(A).data_file = N1.get_data_list();
+A.node_list = N1.get_node_list();
+A.edge_list = N1.get_edge_list();
 static pthread_t Serv;
 int fail;
 long xy;
@@ -96,8 +113,9 @@ long xy;
         printf("Error on INIT Server see errors:\n");
         return 0;
     } 
-    
-xy = pthread_create(&Serv,NULL,ServerT,(void *)0);
+
+xy = pthread_create(&Serv,NULL, ServerT ,&A);
+
 if(xy){
     printf("@Thread ERROR\n");
     exit(-1);
@@ -129,7 +147,7 @@ printf("\nPlease Select the following options: >>>\n1.Publish File\n0.Quit\n Or 
         }
     } while (ch);
 pthread_join(Serv,NULL);
-
+// free(A);
 pthread_mutex_destroy(&mutex);
     return 0;
 
@@ -181,7 +199,7 @@ return 0;
 
 
 
-void Recieve(int address, )// delete after usage..
+void Recieve(unsigned address, dataset * data_file, node * node_list, edge ** edge_list)// delete after usage..
 {
     
     fd_set active, read;
@@ -192,7 +210,7 @@ void Recieve(int address, )// delete after usage..
     int k=0;
     int n;
     char buff[MX_STR_LEN]={0};
-        PORT = N1.get_address();//GLOBALLY SETS PORT NUMBER 
+        PORT = address;//GLOBALLY SETS PORT NUMBER 
 
 
         // TODO FIX THIS THINGY
@@ -222,6 +240,7 @@ void Recieve(int address, )// delete after usage..
                         perror("accept");
                         exit(EXIT_FAILURE);
                     }
+                    printf("accepting message\n");
                     FD_SET(client_socket, &active);
                 }
                 else
@@ -236,10 +255,12 @@ void Recieve(int address, )// delete after usage..
                     printf("%s  = buff\n",buff);
                     REC_PORT = PortParser(buff);
 
+
                     if(REC_PORT == PORT)//Meant to be here 
                     {
                         int l = 0;
-                        if(l =N1.add_file(buff)!=1)printf("Error on adding file to NODE Struct\n");//THis adds the file to a piece of memory like a pointer (NODES.CPP)
+                        printf("Recieved Package!\n");
+                        if(l = N1.add_file(buff, data_file)!=1)printf("Error on adding file to NODE Struct\n");//THis adds the file to a piece of memory like a pointer (NODES.CPP)
                     }
                     else
                     {//CONOR HELP WITH DEFS PLEASE HERE :)
@@ -247,7 +268,9 @@ void Recieve(int address, )// delete after usage..
                         int NEXT_PORT = 0;
                         // edge ** e_list = X.get_edge_list;
                         // node * n_list = X.get_node_list;
-                        NEXT_PORT = shortest_path(PORT,REC_PORT,e_arr,list); //FIND NEXT BEST PLACE TO MOVE ON
+                        printf("INT CHECK == %d\n",NEXT_PORT);
+                        NEXT_PORT = shortest_path(PORT,REC_PORT,edge_list,node_list); //FIND NEXT BEST PLACE TO MOVE ON
+                        printf("INT CHECK == %d\n",NEXT_PORT);
                         ClientCreate(NEXT_PORT,buff);//send it to this address and next port.
                     }//
                     close(i);
@@ -318,12 +341,12 @@ unsigned long ha =(MAX);
     printf("Sending message:%s\n",buffer);
    
     //process_buffer(buffer, MAX);//adds the \0 instaed of \n 
-    sprintf(msg, buffer); // format of data not entirely nesicary if we have enough spac in first array
+    sprintf(msg, "%s",buffer); // format of data not entirely nesicary if we have enough spac in first array
     //Basically puts the string csv into this message and adds a \0 to make sure it sends correct.
     // this gets sent to the buffer
 
     send(Csockfd, msg, sizeof(msg), 0); // send to the created socket
-    printf("\nMessage sent\n");
+    printf("\nMessage sent\n\n\n");
 	
 
 	// close the socket
@@ -343,29 +366,25 @@ void FileDistro(dataset * file, int address, node * node_list,
     int num_of_segs = 10;
     int seg_size = (file->char_count)/num_of_segs;
     int index = 0;
-    char *message;
     
     printf("Finish init FileDistro\n");
-
+    
     for(int i=0; i<num_of_segs; i++){
-        message = (char*) malloc(MX_STR_LEN * sizeof(char));
+        char * message = (char*)malloc(MX_STR_LEN * sizeof(char));
         if(message==NULL){
             printf("Malloc Failed\n");
         }
-        printf("wadli:%i\n", file->id);
 
         message = N1.share_file(file, seg, seg_size, index,
                                 node_list, address);
          //that makes string into segments and assigns the segments to portn numbers in the form "111.5345."ARG""
         
         printf("Finished assembling segment %i.\n", seg);
-        printf("%s\n", message);
+        printf("%s\n\n", message);
         int DEST_PORT = PortParser(message); 
-        printf("dest port: %i\n", DEST_PORT);
         int NEXT = shortest_path(address,DEST_PORT,edge_list,node_list);
-        printf("Send seg %i to port %i\n", seg, NEXT);
+        printf("Send seg %i to port %i\n\n", seg, NEXT);
         ClientCreate(NEXT,message);
-        free(message); //stop memory leaks
         index = index + seg_size;
         seg++;
     }
@@ -379,6 +398,6 @@ int PortParser(char* buff){
     strcpy(copy, buff);
     char * parse = (char*)malloc(MX_STR_LEN * sizeof(char));
     parse = strtok(copy, ".");
-    printf("Directing to node %s.\n", parse);
+    //printf("PASER SAYS %s.\n", parse);
     return atoi(parse);
 }
