@@ -33,7 +33,7 @@ void process_buffer(char *buffer, int max_len)
 }
 pthread_mutex_t mutex;
 int err=0;
-void *ServerT(void* a){
+void *ServerT(void* a,Node X,edge ** e_list, node * n_list){
    
      if(listen(sockfd,BACKLOG)<0)//-1 = errno
     {
@@ -50,7 +50,7 @@ void *ServerT(void* a){
     
 while(1){
     sleep(3);//Sleep for a bit to allow the client to do stuff..a
-    Recieve();//ATM NO NEED TO CALL ANYTHING BECAUSE WE USE GLOBAL VAR RN
+    Recieve( X, e_list, n_list);//ATM NO NEED TO CALL ANYTHING BECAUSE WE USE GLOBAL VAR RN
 // Command exits as connection is finished..
     //TODO simple messaging for DEV Please remove afterusage....
 }
@@ -170,7 +170,7 @@ return 0;
 
 
 
-void Recieve(Node X)// delete after usage..
+void Recieve(Node X,edge ** e_list, node * n_list )// delete after usage..
 {
     
     fd_set active, read;
@@ -232,8 +232,8 @@ void Recieve(Node X)// delete after usage..
                     {//CONOR HELP WITH DEFS PLEASE HERE :)
                     //#FIXME: 
                         int NEXT_PORT = 0;
-                        edge ** e_list = X.get_edge_list;
-                        node * n_list = X.get_node_list;
+                        // edge ** e_list = X.get_edge_list;
+                        // node * n_list = X.get_node_list;
                         NEXT_PORT = ShortestPath(PORT,REC_PORT,e_list,n_list); //FIND NEXT BEST PLACE TO MOVE ON
                         ClientCreate(NEXT_PORT,buff);//send it to this address and next port.
                     }//
