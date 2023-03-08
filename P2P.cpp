@@ -75,6 +75,7 @@ Node N1;
     node * curr = list;
     edge ** e_arr = (N1.get_edge_list());
     edge * e_head;
+    PORT = N1.get_address();//GLOBALLY SETS PORT NUMBER 
 ///////////////////////////////////////////////////////////////// 
 //Server Section:
 //////////////////////////////////////////////////////////////////
@@ -133,7 +134,6 @@ int Server()
     int force =1;
 //     char *usrname =get_name    
 //    printf("Username = %s",usrname);
-    PORT = get_address();//Trying to implement this thingy
     printf("Host Port number: %d",PORT);
     // struct sigaction sa;
     // int yes=1;
@@ -170,7 +170,7 @@ return 0;
 
 
 
-void Recieve()// delete after usage..
+void Recieve(Node X)// delete after usage..
 {
     
     fd_set active, read;
@@ -180,7 +180,9 @@ void Recieve()// delete after usage..
     FD_SET(sockfd, &active);
     int k=0;
     int n;
-            char buff[MAX]={0};
+    char buff[MAX]={0};
+        PORT = X.get_address();//GLOBALLY SETS PORT NUMBER 
+
 
         // TODO FIX THIS THINGY
       while (1)
@@ -213,19 +215,25 @@ void Recieve()// delete after usage..
                 }
                 else
                 {
-                    int rec_PORT = 0;
+                    int REC_PORT = 0;
                     //data is arriving on an already connected socket
                     n = recv(i, buff, sizeof(buff), 0);
                     //Take
                     //Recieved buffer and parse first part;
+                    //ADD ERROR COND FOR N
+                    REC_PORT = PortParser(buff);
+
                     if(REC_PORT == PORT)//Meant to be here 
                     {
-                        add_file();//THis adds the file to a piece of memory like a pointer (NODES.CPP)
+                        int l = 0;
+                        if(l =X.add_file(buff)!=1)printf("Error on adding file to NODE Struct\n");//THis adds the file to a piece of memory like a pointer (NODES.CPP)
                     }
                     else
-                    {
+                    {//CONOR HELP WITH DEFS PLEASE HERE :)
                         int NEXT_PORT = 0;
-                        NEXT_PORT = ShortestPath(REC_PORT); //FIND NEXT BEST PLACE TO MOVE ON
+                        edge ** e_list = X.get_edge_list;
+                        node * n_list = X.get_node_list;
+                        NEXT_PORT = ShortestPath(PORT,REC_PORT,e_list,n_list); //FIND NEXT BEST PLACE TO MOVE ON
                         ClientCreate(NEXT_PORT,buff);//send it to this address and next port.
                     }//
                     close(i);
@@ -339,4 +347,21 @@ char *message;
     ClientCreate(Neighbour[i],message);
     i++;
    }
+}
+
+
+int PortParser(char* buff){
+int x =0;
+int k = 1;
+char port[3];
+int ans = 0;
+    while((*buff) != ',')
+{
+port[x] =(*buff);
+
+buff =buff+k;
+x++;
+}
+ans = atoi(port);
+return ans;
 }
