@@ -19,7 +19,6 @@
 // Globals...
 ///////////////////////////////////////////////NODE GLOBAL var
 Node N1;
-	
 node * list ;
 node * curr;
 edge ** e_arr;
@@ -31,17 +30,17 @@ edge * e_head;
 //TODO: Clean up variables and get it to run...
 //TODO: Look at cmd line 
 //TODO URGENT  make a way of chosing which port number for multiple hosts...
-void process_buffer(char *buffer, int max_len)
-{//ADDS NULL TO END OF STRING 
-    for (int i = 0; i < max_len; i++)
-    {
-        if ((buffer[i] == '\n') || (buffer[i] == '\r'))
-        {
-            buffer[i] = '\0';
-            break;
-        }
-    }
-}
+// void process_buffer(char *buffer, int max_len)
+// {//ADDS NULL TO END OF STRING 
+//     for (int i = 0; i < max_len; i++)
+//     {
+//         if ((buffer[i] == '\n') || (buffer[i] == '\r'))
+//         {
+//             buffer[i] = '\0';
+//             break;
+//         }
+//     }
+// }
 pthread_mutex_t mutex;
 int err=0;
 void *ServerT(void* a){
@@ -78,7 +77,8 @@ int main(int argc, char *argv[]){
 	if(!N1.init_node(argv)){
 		printf("Err in init node (port id: %i)\n", atoi(argv[1]));
 	}
-
+    printf("file id: %i\n", N1.get_file()->id);
+    int file = N1.get_file()->id;
     node * list = N1.get_node_list();
     node * curr = list;
     edge ** e_arr = (N1.get_edge_list());
@@ -103,18 +103,21 @@ if(xy){
     exit(-1);
 }
 int ch; 
-
+printf("file id: %i\n", N1.get_file()->id);
 printf("\nPlease Select the following options: >>>\n1.Publish File\n0.Quit\n Or ..Wait\n");
     printf("\nEnter choice:");
 
     do
     {
         scanf("%d", &ch);
+        printf("file id: %i\n", N1.get_file()->id);
         switch (ch)
         {
         case 1:
-            FileDistro();
+            FileDistro(N1.get_file(),N1.get_address(), 
+                    N1.get_node_list(), N1.get_map(), N1.get_edge_list());
             break;
+            
         case 2:
             printf("Requesting FILE NOT YET ADDED\n Please try again.");
             break;
@@ -178,7 +181,7 @@ return 0;
 
 
 
-void Recieve()// delete after usage..
+void Recieve(int address, )// delete after usage..
 {
     
     fd_set active, read;
@@ -188,7 +191,7 @@ void Recieve()// delete after usage..
     FD_SET(sockfd, &active);
     int k=0;
     int n;
-    char buff[MAX]={0};
+    char buff[MX_STR_LEN]={0};
         PORT = N1.get_address();//GLOBALLY SETS PORT NUMBER 
 
 
@@ -229,6 +232,8 @@ void Recieve()// delete after usage..
                     //Take
                     //Recieved buffer and parse first part;
                     //ADD ERROR COND FOR N
+                    printf("my_port: %i\n", PORT);
+                    printf("%s  = buff\n",buff);
                     REC_PORT = PortParser(buff);
 
                     if(REC_PORT == PORT)//Meant to be here 
@@ -261,6 +266,7 @@ void Recieve()// delete after usage..
 
 int ClientCreate(int PORT_server,char *buffer)
 {
+    printf("In CLIENT\n");
 
 int Csockfd =99;//SOCKET FILE DESCRIPTOR returns -1 on errno
     struct sockaddr_in Chints;// was using the addrinfo but doesnt work for single networking..
@@ -296,7 +302,7 @@ if (connect(Csockfd, (struct sockaddr *)&Chints,sizeof Chints) == -1) {//connect
             perror("ERROR client: connect");
 			return 1;
 }
-
+printf("cLIENT FINE\n");
 //TODO: Remove this later just for DEBUGging
 // inet_ntop(Cres->ai_family, get_in_addr((struct sockaddr *)Cres->ai_addr),
 //             s, sizeof s);
@@ -311,12 +317,12 @@ unsigned long ha =(MAX);
 	
     printf("Sending message:%s\n",buffer);
    
-    process_buffer(buffer, MAX);//adds the \0 instaed of \n 
-    // sprintf(msg, buffer); // format of data not entirely nesicary if we have enough spac in first array
+    //process_buffer(buffer, MAX);//adds the \0 instaed of \n 
+    sprintf(msg, buffer); // format of data not entirely nesicary if we have enough spac in first array
     //Basically puts the string csv into this message and adds a \0 to make sure it sends correct.
     // this gets sent to the buffer
 
-    send(Csockfd, buffer, sizeof(buffer), 0); // send to the created socket
+    send(Csockfd, msg, sizeof(msg), 0); // send to the created socket
     printf("\nMessage sent\n");
 	
 
@@ -326,48 +332,53 @@ unsigned long ha =(MAX);
 	
 }
 //NOTE SHOULD PASS IN NODE ADDRESSLIST
-void FileDistro(){//Generates the list of files and sends them
-   int i = 0;
-    
+void FileDistro(dataset * file, int address, node * node_list,
+                int * map, edge ** edge_list){//Generates the list of files and sends them
+    int i = 0;
     //#FIXME:   
     //STEP 1 SPLITTING SEGMENT
     // STEP 2 IS ROUTING THE SEGMENT FINDING WHERE TO SEND IT FIRST
     //STEP 3 SEND THE PACKETS TO WHATEVER ROUTE FOUND BEST.        
     int seg = 100;
     int num_of_segs = 10;
-    int seg_size = (N1.get_file()->char_count)/num_of_segs;
+    int seg_size = (file->char_count)/num_of_segs;
     int index = 0;
     char *message;
+    
     printf("Finish init FileDistro\n");
 
-for(int i=0; i<num_of_segs; i++){
-    message =(char*) malloc(MX_STR_LEN * sizeof(char));
-    message = N1.share_file(seg, seg_size, index, (N1.get_file())->char_count); //that makes string into segments and assigns the segments to portn numbers in the form "111.5345."ARG""
-    index = index + seg_size;
-    printf("Finished assembling segment %i.\n", seg);
-    seg++;
-    int DEST_PORT =PortParser(message); 
-    int NEXT =shortest_path(PORT,DEST_PORT,e_arr,list);
-    ClientCreate(NEXT,message);
-    free(message); //stop memory leaks
-}
+    for(int i=0; i<num_of_segs; i++){
+        message = (char*) malloc(MX_STR_LEN * sizeof(char));
+        if(message==NULL){
+            printf("Malloc Failed\n");
+        }
+        printf("wadli:%i\n", file->id);
+
+        message = N1.share_file(file, seg, seg_size, index,
+                                node_list, address);
+         //that makes string into segments and assigns the segments to portn numbers in the form "111.5345."ARG""
+        
+        printf("Finished assembling segment %i.\n", seg);
+        printf("%s\n", message);
+        int DEST_PORT = PortParser(message); 
+        printf("dest port: %i\n", DEST_PORT);
+        int NEXT = shortest_path(address,DEST_PORT,edge_list,node_list);
+        printf("Send seg %i to port %i\n", seg, NEXT);
+        ClientCreate(NEXT,message);
+        free(message); //stop memory leaks
+        index = index + seg_size;
+        seg++;
+    }
   
-   return;
+    return;
 }
 
 
 int PortParser(char* buff){
-int x =0;
-int k = 1;
-char port[3];
-int ans = 0;
-    while((*buff) != '.')
-{
-port[x] =(*buff);
-
-buff =buff+k;
-x++;
-}
-ans = atoi(port);
-return ans;
+    char * copy = (char*)malloc(MX_STR_LEN * sizeof(char));
+    strcpy(copy, buff);
+    char * parse = (char*)malloc(MX_STR_LEN * sizeof(char));
+    parse = strtok(copy, ".");
+    printf("Directing to node %s.\n", parse);
+    return atoi(parse);
 }

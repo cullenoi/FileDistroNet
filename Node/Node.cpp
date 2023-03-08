@@ -53,7 +53,7 @@ int Node::load_node_info(char *fname){
         exit (1);
     }
     // set check var
-    file->id = 0;
+    file->id = 69;//possible point
     char row[ROW_LEN];
     char * token;
     fgets(row, ROW_LEN, csv);
@@ -212,8 +212,9 @@ int Node::add_file(char * dataseg){
         new_data->next = data;
     }
     data = new_data;
+    char * parse = (char*)malloc(MX_STR_LEN * sizeof(char));
     // parse msg
-    char * parse = strtok(dataseg, ".");
+    parse = strtok(dataseg, ".");
     printf("Adding file to node %s..", parse);
     // read in file ID
     parse = strtok(NULL, ".");
@@ -231,41 +232,59 @@ int Node::add_file(char * dataseg){
 
 }
 
-char * Node::share_file(int seg, int seg_size, int index, int char_count){
+char * Node::share_file(dataset * file, int seg, int seg_size, int index, 
+                        node * node_list, int address){
     // parse the file into x amount of pieces.
     printf("create data packet: %i\n", seg);
-    
+
     char point = '.';
     char * msg = (char*)malloc(MX_STR_LEN * sizeof(char));
-    char * int_char;
-    sprintf(int_char, "%d", address);
+    //memset(msg, 0, strlen(msg));//sets to null
+    char * int_char = (char*)malloc(10*sizeof(char));
+    //FIXME
+    int dest_port = rendezvous(file->id, seg, node_list, address);
+
+    sprintf(int_char, "%d", dest_port);
     strcat(msg, int_char);
     strcat(msg, &point);
+    printf("%s\n", msg);
     // cout << msg << endl;
     sprintf(int_char, "%d", file->id);
     strcat(msg, int_char);
     strcat(msg, &point);
+    printf("%s\n", msg);
     // cout << msg << endl;
-    sprintf(int_char, "%d", file->seg);
+    sprintf(int_char, "%d", seg);
     strcat(msg, int_char);
     strcat(msg, &point);
+    printf("%s\n", msg);
     //cout << msg << endl;
 
-    // read in data
-
-    if(seg != 109){
+    // // read in data
+    //char * buffer = (char*)malloc(seg_size * sizeof(char));
+    char buffer;
+    char end = '\0';
+    printf("%s\n", msg);
+    if(seg == 109){
+        int i = 0;
         for(int j=index; j<file->char_count; j++){
-            msg = msg + file->word[j];
+            buffer = file->word[j];
+            strcat(msg, &buffer);
         }
+        strcat(msg, &end);
+        printf("%s\n", msg);
         return msg;
     }
     else{
         for(int j=index; j<index+seg_size; j++){
-            msg = msg + file->word[j];
+            buffer = file->word[j];
+            strcat(msg, &buffer);
         }
+        strcat(msg, &end);
+        printf("%s\n", msg);
         return msg;
     }
-        
+
     }
     // special case final seg.
 
@@ -304,6 +323,7 @@ node * Node::get_node_list(){return address_book;}
 edge ** Node::get_edge_list(){return edge_list;}
 dataset * Node::get_file(){return file;}
 dataset * Node::get_data_list(){return data;}
+int * Node::get_map(){return map;}
 
 /*
 int main(int argc, char *argv[]){
