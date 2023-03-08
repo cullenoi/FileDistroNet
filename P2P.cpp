@@ -230,6 +230,7 @@ void Recieve(Node X)// delete after usage..
                     }
                     else
                     {//CONOR HELP WITH DEFS PLEASE HERE :)
+                    //#FIXME: 
                         int NEXT_PORT = 0;
                         edge ** e_list = X.get_edge_list;
                         node * n_list = X.get_node_list;
