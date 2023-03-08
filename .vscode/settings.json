@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "P2P.C": "cpp",
-        "*.ipp": "cpp"
+        "*.ipp": "cpp",
+        "string": "cpp"
     }
 }

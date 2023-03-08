@@ -48,6 +48,10 @@ int Node::init_node(char * argv[]){
 
 int Node::load_node_info(char *fname){
     FILE * csv = fopen(fname, "r");
+    if(csv == NULL){
+          printf ("@rror\n");
+        exit (1);
+    }
     // set check var
     file->id = 0;
     char row[ROW_LEN];
@@ -227,53 +231,50 @@ int Node::add_file(char * dataseg){
 
 }
 
-int Node::share_file(){
+char * Node::share_file(int seg, int seg_size, int index, int char_count){
     // parse the file into x amount of pieces.
-    printf("create data packets\n");
-    int seg = 100;
-    int num_of_segs = 10;
-    int seg_size = file->char_count/num_of_segs;
-    int index = 0;
-    for(int i=0; i<num_of_segs; i++){
+    printf("create data packet: %i\n", seg);
+    
+    char point = '.';
+    char * msg = (char*)malloc(MX_STR_LEN * sizeof(char));
+    char * int_char;
+    sprintf(int_char, "%d", address);
+    strcat(msg, int_char);
+    strcat(msg, &point);
+    // cout << msg << endl;
+    sprintf(int_char, "%d", file->id);
+    strcat(msg, int_char);
+    strcat(msg, &point);
+    // cout << msg << endl;
+    sprintf(int_char, "%d", file->seg);
+    strcat(msg, int_char);
+    strcat(msg, &point);
+    //cout << msg << endl;
 
-        string msg;
-        msg = msg + to_string(rendezvous(file->id, (seg+i),
-                              address_book, address));
-        // cout << msg << endl;
-        msg = msg + "." + to_string(file->id);
-        // cout << msg << endl;
-        msg = msg + "." + to_string(seg + i) + ".";
-        //cout << msg << endl;
+    // read in data
 
-        // read in data
-
-        if(i == num_of_segs-1){
-            for(int j=index; j<file->char_count; j++){
-                msg = msg + file->word[j];
-            }
-            index = index + seg_size;
-            cout << msg << endl;
+    if(seg != 109){
+        for(int j=index; j<file->char_count; j++){
+            msg = msg + file->word[j];
         }
-        else{
-            for(int j=index; j<index+seg_size; j++){
-                msg = msg + file->word[j];
-            }
-            index = index + seg_size;
-            cout << msg << endl;
+        return msg;
+    }
+    else{
+        for(int j=index; j<index+seg_size; j++){
+            msg = msg + file->word[j];
         }
+        return msg;
+    }
         
     }
     // special case final seg.
 
 
-    return 1;
-}
-
 // getters
 
 char * Node::return_file_seg(int dest_port, int file_id, int file_seg){
     dataset * curr = data;
-    char data_seg[MX_STR_LEN];
+    char * data_seg = (char*)malloc(MX_STR_LEN*sizeof(char));
     char buffer[MX_STR_LEN];
     while(curr){
         if(curr->id == file_id && curr->seg == file_seg){
@@ -304,7 +305,7 @@ edge ** Node::get_edge_list(){return edge_list;}
 dataset * Node::get_file(){return file;}
 dataset * Node::get_data_list(){return data;}
 
-
+/*
 int main(int argc, char *argv[]){
 	Node N1;
 	if(!N1.init_node(argv)){
@@ -335,7 +336,7 @@ int main(int argc, char *argv[]){
     printf("\nshortest path proof\n\n");
     cout << "Destination: ";
     cin >> end;
-    if(end == N1.get_address()){
+    if((end == N1.get_address()){
         printf("Already at node\n");
     }
     else{
@@ -358,7 +359,7 @@ int main(int argc, char *argv[]){
    
     return 0;
 }
-
+*/
 
 // nodes know about other nodes throught the 'address book', DHT
 // the DHT could be organised by a central authourity but for the purpose and functionality of this network

@@ -15,14 +15,18 @@
 #include <signal.h>
 #include <sys/select.h>
 
+#include "Node/Node.h"
+#include "Node/Tracker.h"
+
  int sockfd , talkfd ;//SOCKET FILE DESCRIPTOR returns -1 on errno
  struct sockaddr_in hints;
  struct sockaddr_in their_addr;
  socklen_t addr_size;
 
+
 #define _SS_PAD1SIZE 3000
 #define BACKLOG 10   // how many pending connections queue will hold
-#define MAX 80
+#define MAX 100
 #define SA struct sockaddr
 /////////server side//
 

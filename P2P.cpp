@@ -2,7 +2,6 @@
 #include "Server.h"
 #include "PublicDef.h"
 #include <pthread.h>
-#include "Node.h"
 
 #include <iostream>
 #include <vector>
@@ -11,9 +10,21 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "Tracker.h"
-#include "Node.h"
-#include "Routing.h"
+#include "Node/Tracker.h"
+#include "Node/Node.h"
+#include "Node/Routing.h"
+
+
+
+// Globals...
+///////////////////////////////////////////////NODE GLOBAL var
+Node N1;
+	
+node * list ;
+node * curr;
+edge ** e_arr;
+edge * e_head;
+
 // TODO: make a thread for server run and call variables.
 //TODO: Look into Gloabalisation and resetting variables (might be easier to just use sep var names and reuse the struscts)
  
@@ -33,7 +44,7 @@ void process_buffer(char *buffer, int max_len)
 }
 pthread_mutex_t mutex;
 int err=0;
-void *ServerT(void* a,Node X,edge ** e_list, node * n_list){
+void *ServerT(void* a){
    
      if(listen(sockfd,BACKLOG)<0)//-1 = errno
     {
@@ -50,23 +61,20 @@ void *ServerT(void* a,Node X,edge ** e_list, node * n_list){
     
 while(1){
     sleep(3);//Sleep for a bit to allow the client to do stuff..a
-    Recieve( X, e_list, n_list);//ATM NO NEED TO CALL ANYTHING BECAUSE WE USE GLOBAL VAR RN
+    Recieve();//ATM NO NEED TO CALL ANYTHING BECAUSE WE USE GLOBAL VAR RN
 // Command exits as connection is finished..
     //TODO simple messaging for DEV Please remove afterusage....
-}
-
+    }
     printf("all is well! :))\n");
     return 0;
-    
-
 }
 
 
 int main(int argc, char *argv[]){
 //////////////////////////////////////////////////////////////////
 //Node Initialisation: place where node PORT is generated and its adress book...
-/////////////////////////////////////////////
-Node N1;
+/////////////////////////////////////////////////////////////////
+    Node N1;
 	if(!N1.init_node(argv)){
 		printf("Err in init node (port id: %i)\n", atoi(argv[1]));
 	}
@@ -170,7 +178,7 @@ return 0;
 
 
 
-void Recieve(Node X,edge ** e_list, node * n_list )// delete after usage..
+void Recieve()// delete after usage..
 {
     
     fd_set active, read;
@@ -181,7 +189,7 @@ void Recieve(Node X,edge ** e_list, node * n_list )// delete after usage..
     int k=0;
     int n;
     char buff[MAX]={0};
-        PORT = X.get_address();//GLOBALLY SETS PORT NUMBER 
+        PORT = N1.get_address();//GLOBALLY SETS PORT NUMBER 
 
 
         // TODO FIX THIS THINGY
@@ -226,7 +234,7 @@ void Recieve(Node X,edge ** e_list, node * n_list )// delete after usage..
                     if(REC_PORT == PORT)//Meant to be here 
                     {
                         int l = 0;
-                        if(l =X.add_file(buff)!=1)printf("Error on adding file to NODE Struct\n");//THis adds the file to a piece of memory like a pointer (NODES.CPP)
+                        if(l =N1.add_file(buff)!=1)printf("Error on adding file to NODE Struct\n");//THis adds the file to a piece of memory like a pointer (NODES.CPP)
                     }
                     else
                     {//CONOR HELP WITH DEFS PLEASE HERE :)
@@ -234,7 +242,7 @@ void Recieve(Node X,edge ** e_list, node * n_list )// delete after usage..
                         int NEXT_PORT = 0;
                         // edge ** e_list = X.get_edge_list;
                         // node * n_list = X.get_node_list;
-                        NEXT_PORT = ShortestPath(PORT,REC_PORT,e_list,n_list); //FIND NEXT BEST PLACE TO MOVE ON
+                        NEXT_PORT = shortest_path(PORT,REC_PORT,e_arr,list); //FIND NEXT BEST PLACE TO MOVE ON
                         ClientCreate(NEXT_PORT,buff);//send it to this address and next port.
                     }//
                     close(i);
@@ -300,9 +308,7 @@ unsigned long ha =(MAX);
         char msg[2000] = {0};
         char X[1024] = {0};
 
-	// 	char* name =(char*)malloc(sizeof(20));
-    // 	printf("Enter the string : \n");
-     char dummy;//dummy to enable terminal
+	
     printf("Sending message:%s\n",buffer);
    
     process_buffer(buffer, MAX);//adds the \0 instaed of \n 
@@ -320,23 +326,33 @@ unsigned long ha =(MAX);
 	
 }
 //NOTE SHOULD PASS IN NODE ADDRESSLIST
-void FileDistro(int Neighbour[]){//Generates the list of files and sends them
+void FileDistro(){//Generates the list of files and sends them
    int i = 0;
-    ///File splitting happens here and the mesage in
-    // the form of 111.1407."arg" should be in the char * message or whatever works...
-// //TODO I need to look into how this actually seperates Realistically I'm thinking we call 
-// the function which splits the array string into the 10 pieces and then we're just calling in the string splitting it and doiung th 
-// NEXT PATH ALGO  
+    
+    //#FIXME:   
+    //STEP 1 SPLITTING SEGMENT
+    // STEP 2 IS ROUTING THE SEGMENT FINDING WHERE TO SEND IT FIRST
+    //STEP 3 SEND THE PACKETS TO WHATEVER ROUTE FOUND BEST.        
+    int seg = 100;
+    int num_of_segs = 10;
+    int seg_size = (N1.get_file()->char_count)/num_of_segs;
+    int index = 0;
+    char *message;
+    printf("Finish init FileDistro\n");
 
-
-// OBJECTIVES: 
-char *message;
-
-   while(Neighbour[i] != NULL){// Cycle through array of int till NONE LEFT
-// I need to look into how this actually seperates Realistically 
-    ClientCreate(Neighbour[i],message);
-    i++;
-   }
+for(int i=0; i<num_of_segs; i++){
+    message =(char*) malloc(MX_STR_LEN * sizeof(char));
+    message = N1.share_file(seg, seg_size, index, (N1.get_file())->char_count); //that makes string into segments and assigns the segments to portn numbers in the form "111.5345."ARG""
+    index = index + seg_size;
+    printf("Finished assembling segment %i.\n", seg);
+    seg++;
+    int DEST_PORT =PortParser(message); 
+    int NEXT =shortest_path(PORT,DEST_PORT,e_arr,list);
+    ClientCreate(NEXT,message);
+    free(message); //stop memory leaks
+}
+  
+   return;
 }
 
 
@@ -345,7 +361,7 @@ int x =0;
 int k = 1;
 char port[3];
 int ans = 0;
-    while((*buff) != ',')
+    while((*buff) != '.')
 {
 port[x] =(*buff);
 
