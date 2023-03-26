@@ -311,9 +311,9 @@ int Csockfd =99;//SOCKET FILE DESCRIPTOR returns -1 on errno
 //create a socket from the info found 
 if( (Csockfd = socket(AF_INET,SOCK_STREAM,0))<0){ //Lets you choose TCP||UDP STREAM||DATAGRAM AI_INET||AI_INET6(Ip_addresse types..)
         fprintf(stderr,"ERROR Client getting socket: %s\n",gai_strerror(Csockfd));
-        return 1;//returning one as error check in main..
-   }
-int force =1;
+        return 1;//returning one as error check i
+#define PORT "3490"  // the port users will be connecting to
+
  if (setsockopt(Csockfd, SOL_SOCKET,SO_REUSEADDR, &force, sizeof(force)))//FORCES THIS SOCKET FileDESC TO THE PORT
     {
         perror("setsockopt");
@@ -325,7 +325,7 @@ if (connect(Csockfd, (struct sockaddr *)&Chints,sizeof Chints) == -1) {//connect
             perror("ERROR client: connect");
 			return 1;
 }
-printf("cLIENT FINE\n");
+printf("CLIENT FINE\n");
 //TODO: Remove this later just for DEBUGging
 // inet_ntop(Cres->ai_family, get_in_addr((struct sockaddr *)Cres->ai_addr),
 //             s, sizeof s);
