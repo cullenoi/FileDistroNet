@@ -6,12 +6,14 @@
 
 void parse_message(struct file_node * f,char * dataseg);
 struct file_node * find_file_node(struct file_node * f, int ID);
+struct node * search_data(struct node * n,int ID);
 
 //nugget of individual file
 struct node {
     int segID;
     char * message;
-    struct node * next;
+    struct node * left;
+    struct node * right;
 };
 
 //
@@ -24,27 +26,42 @@ struct file_node{
 int main(){
     printf("hello world\n");
 
+    //what i have learned: make a temp variable first, then asign the p->next to it
+    //need to assign a new temp variable->one per instance of function
+
+
+    struct file_node *temp = (struct file_node*)malloc(sizeof(struct file_node));
+
+
+
     //keep head of File linked list in main
     struct file_node * head = NULL;
     head = (struct file_node*)malloc(sizeof(struct file_node));
-    head->fileID = 13;
-    head->next = NULL;
+    struct file_node * p = NULL;
+    p = (struct file_node*)malloc(sizeof(struct file_node));
+    p = head;
+    p->next = NULL;
+    p->data = NULL;
 
 
-    parse_message(head,"1111.2222.333.bleh");
+    parse_message(p,"1111.13.333.bleh");
+    parse_message(p,"1111.15.333.bleh");
+    parse_message(p,"1111.2222.333.bleh");
+    parse_message(p,"1111.2222.333.bleh");
+    parse_message(p,"1111.2224.333.bleh");
+    parse_message(p,"1111.13.333.bleh");
+    parse_message(p,"1111.2222.333.bleh");
+
+
+    //Show full list
+    while(head != NULL){
+        printf("|%d|->",head->fileID);
+        head = head->next;
+    }
+    printf("\n");
 
     return 0;
 }
-/*
-reciever code
-takes all bits of message
-use node.cpp parser to separate each value
-main() holds linked-linked lists
-linked list for each separate file ID
-Each segment ID starts at 100 -> create a node per 1
-If segID is out of order, create nodes in between, with no filling
-
-*/
 
 //Takes full message, uses individual bits to call function and sort messages
 void parse_message(struct file_node * f,char * dataseg){
@@ -53,10 +70,11 @@ void parse_message(struct file_node * f,char * dataseg){
 
     // parse msg
     char * parse = strtok(dataseg, ".");
-    printf("Adding file to node %s...\n", parse);
+    printf("1. |NEW ENTRY| Adding file to node %s...\n", parse);
     // read in file ID
     parse = strtok(NULL, ".");
     id = atoi(parse);
+    printf("2.Input ID is %d\n",id);
     // read in seg ID
     parse = strtok(NULL, ".");
     seg = atoi(parse);
@@ -67,29 +85,68 @@ void parse_message(struct file_node * f,char * dataseg){
     strcpy(word, parse);
 
     //begin putting data in correct linked lists
-    struct file_node * ff = find_file_node(f,14);
+    //ff contains element of linked list->either NULL or matching file ID
+    struct file_node * ff = NULL;
+    ff = find_file_node(f,id);
+    if(ff == NULL){
+        printf("|ff is NULL\n");
+        ff = f;
+        while(ff->next != NULL){
+            ff = ff->next;
+        }
+        struct file_node * temp = (struct file_node*)malloc(sizeof(struct file_node));
+        temp->fileID = id;
+        temp->next = NULL;
+        temp->data = NULL;
+        ff->next = temp;
+        ff = ff->next;
+    }
 
-    if(ff == NULL){//TODO create new node and input data
-        printf("NULL node given from function\n");
-    }
-    else{//TODO input seg data to node
-        printf("Node has file ID = %d\n",ff->fileID);
-    }
+    //put word in seg order
+    //search_data(ff->data,seg);
+     
 
 }
+
+//traverse binary tree to see if it contains node with seg ID
+struct node * search_data(struct node * n,int ID){
+    int check = 0;
+    //find node with matcing id or NULL end of list
+    while(n != NULL && check != 1){
+        if(n->segID = ID){
+            check = 1;
+        }
+        else{
+            //n = n->next;
+        }
+        if(n = NULL){
+            //create new node
+        }
+        else{
+            //end of function
+        }
+    }
+    return NULL;
+}
+
+
+
     //find the corrosponding file node in linked list to dataseg
     //returns file node that has matching file ID
-    struct file_node * find_file_node(struct file_node * f, int ID){
-        int check = 0;
-        while(f != NULL && check != 1){
-            printf("here\n");
-            if(f->fileID == ID){
-                check = 1;
-            }
-            else{
-                printf("going next\n");
-                f = f->next;
-            }
+struct file_node * find_file_node(struct file_node * f, int ID){
+    int check = 0;
+    while(check != 1 && f != NULL){
+        if(f->fileID == ID){
+            check = 1;
         }
+        else{
+            f = f->next;
+        }
+    }
+    if(f == NULL){
+        return NULL;
+    }
+    else{
         return f;
     }
+}
