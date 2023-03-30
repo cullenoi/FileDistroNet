@@ -40,7 +40,6 @@ int rendezvous(int file_key, int file_seg, node * head, int self){
 
     int best_node = 0, hash_val, best_hash = 0;
     node * curr = head;
-
     while(curr->next->id != 0){
         if(curr->id != self){
             hash_val = hash(file_key, file_seg, curr->id);
@@ -51,7 +50,6 @@ int rendezvous(int file_key, int file_seg, node * head, int self){
         }
         curr = curr->next;
     }
-
     return best_node;
 
 }
@@ -65,7 +63,7 @@ int hash(int key, int seg, int node){
     mul = mul * key % 191;
     mul = mul * 54 * seg;
     mul = mul + node;
-    mul = mul * seg;
+    mul = mul + seg * 3;
     mul = mul % 12487;
     return mul;
 }

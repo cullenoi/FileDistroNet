@@ -63,10 +63,11 @@ class Node {
         char * return_file_seg(int dest_port, int file_id, int file_seg);
 
         int book_update(int node_id, int action);
-        
-        int share_file();
+      
+        char * share_file(dataset * file, int seg, int seg_size, int index,
+                          node * node_list, int address);
 
-        int add_file(char * dataseg);
+        int add_file(char * dataseg, dataset * data_file);
 
         // getters 
 
@@ -75,6 +76,7 @@ class Node {
         edge ** get_edge_list();
         dataset * get_file();
         dataset * get_data_list();
+        int * get_map();
 
 };
 
