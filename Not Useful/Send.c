@@ -69,15 +69,15 @@ if( (Csockfd = socket(AF_INET,SOCK_STREAM,0))<0){ //Lets you choose TCP||UDP STR
         fprintf(stderr,"ERROR Client getting socket: %s\n",gai_strerror(Csockfd));
         return 1;//returning one as error check in main..
    }
-// int force =1;
-//  if (setsockopt(Csockfd, SOL_SOCKET,SO_REUSEADDR, &force, sizeof(force)))//FORCES THIS SOCKET FD TO THE PORT
-//     {
-//         perror("setsockopt");
-//         exit(EXIT_FAILURE);
-//     }
+
 //Try bind instead of connect
 bind(Csockfd, (struct sockaddr *)&Chints, sizeof Chints);
-
+int force =1;
+ if (setsockopt(Csockfd, SOL_SOCKET,SO_REUSEADDR, &force, sizeof(force)))//FORCES THIS SOCKET FD TO THE PORT
+    {
+        perror("setsockopt");
+        exit(EXIT_FAILURE);
+    }
 if (connect(Csockfd, (struct sockaddr *)&Chints,sizeof Chints) == -1) {
             close(Csockfd);
             perror("ERROR client: connect");
@@ -109,12 +109,12 @@ unsigned long ha =(MAX);
     //  I know fgets, so I replaced it
     fgets(X, 1024, stdin);
     process_buffer(X, 1024);
-    sprintf(buffer, "[PORT:%d] says: %s", PORT, X); // format of data sent
+    sprintf(buffer, "[PORT:%d] says: %s", PORT_server, X); // format of data sent
     // this gets sent to the buffer
 
     send(Csockfd, buffer, sizeof(buffer), 0); // send to the created socket
     printf("\nMessage sent\n");
-    close(sock); // then immediately close
+    close(Csockfd); // then immediately close
 	
 
 	// close the socket
