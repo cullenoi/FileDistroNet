@@ -1,70 +1,104 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
 
-#define MX_STR_LEN 100
+void data_insert_order(struct data_node * root);
 
-void parse_message(struct file_node * f,char * dataseg);
-struct file_node * find_file_node(struct file_node * f, int ID);
-struct node * search_data(struct node * n,int ID);
 
-//nugget of individual file
-struct node {
-    int segID;
-    char * message;
-    struct node * left;
-    struct node * right;
-};
 
-//
+
+
+
 struct file_node{
-    int fileID;
-    struct file_node * next;
-    struct node * data;
+int ID;
+struct data_node * data;
+struct file_node *left;
+struct file_node *right;
 };
 
-int main(){
-    printf("hello world\n");
+struct data_node{
+int ID;
+char * message;
+struct data_node *left;
+struct data_node *right;
+};
 
-    //what i have learned: make a temp variable first, then asign the p->next to it
-    //need to assign a new temp variable->one per instance of function
-
-
-    struct file_node *temp = (struct file_node*)malloc(sizeof(struct file_node));
-
-
-
-    //keep head of File linked list in main
-    struct file_node * head = NULL;
-    head = (struct file_node*)malloc(sizeof(struct file_node));
-    struct file_node * p = NULL;
-    p = (struct file_node*)malloc(sizeof(struct file_node));
-    p = head;
-    p->next = NULL;
-    p->data = NULL;
-
-
-    parse_message(p,"1111.13.333.bleh");
-    parse_message(p,"1111.15.333.bleh");
-    parse_message(p,"1111.2222.333.bleh");
-    parse_message(p,"1111.2222.333.bleh");
-    parse_message(p,"1111.2224.333.bleh");
-    parse_message(p,"1111.13.333.bleh");
-    parse_message(p,"1111.2222.333.bleh");
-
-
-    //Show full list
-    while(head != NULL){
-        printf("|%d|->",head->fileID);
-        head = head->next;
-    }
-    printf("\n");
-
-    return 0;
+struct data_node *get_data_node(int value,char *word){
+struct data_node *newNode = malloc(sizeof(struct data_node));
+newNode->left = NULL;
+newNode->right = NULL;
+newNode->ID = value;
+int wordlength = strlen(word);
+newNode->message = (char*)malloc(sizeof(wordlength));
+strcpy(newNode->message,word);
+return newNode;
 }
 
-//Takes full message, uses individual bits to call function and sort messages
-void parse_message(struct file_node * f,char * dataseg){
+struct data_node * data_insert(struct data_node * root,int ID,char * message){
+if(root == NULL){
+return get_data_node(ID,message);
+}
+if(root->ID < ID){
+root->right = data_insert(root->right,ID,message);
+}
+else if(root->ID > ID){
+root->left = data_insert(root->left,ID,message);
+}
+return root; 
+}
+
+struct file_node *getNode(int value){
+struct file_node *newNode = malloc(sizeof(struct file_node));
+newNode->left = NULL;
+newNode->right = NULL;
+newNode->data = NULL;
+newNode->ID = value;
+return newNode;
+}
+
+struct file_node *insert(struct file_node *root, int value){
+if(root == NULL)
+return getNode(value);
+if(root->ID < value)
+root->right = insert(root->right,value);
+else if(root->ID > value)
+root->left = insert(root->left,value);
+return root;
+}
+
+void insertorder(struct file_node *root){
+if(root == NULL)
+return;
+insertorder(root->left);
+printf("%d ",root->ID);
+insertorder(root->right);
+}
+
+void data_insert_order(struct data_node *root){
+if(root == NULL)
+return;
+data_insert_order(root->left);
+printf("%d%s ",root->ID,root->message);
+data_insert_order(root->right);
+}
+
+struct file_node * find_node(struct file_node * root, int value){
+    if(root == NULL){
+        return NULL;
+    }
+    else if (root->ID == value){
+        return root;
+    }
+    else if(root->ID > value){
+        return find_node(root->left,value);
+    }
+    else if(root->ID < value){
+        return find_node(root->right,value);
+    }
+    return NULL;
+}
+
+struct file_node *parse_message(struct file_node *root,char*dataseg){
     int id, seg, wordlength;
     char* word;
 
@@ -84,69 +118,48 @@ void parse_message(struct file_node * f,char * dataseg){
     word = (char*)malloc(sizeof(wordlength));
     strcpy(word, parse);
 
-    //begin putting data in correct linked lists
-    //ff contains element of linked list->either NULL or matching file ID
-    struct file_node * ff = NULL;
-    ff = find_file_node(f,id);
-    if(ff == NULL){
-        printf("|ff is NULL\n");
-        ff = f;
-        while(ff->next != NULL){
-            ff = ff->next;
-        }
-        struct file_node * temp = (struct file_node*)malloc(sizeof(struct file_node));
-        temp->fileID = id;
-        temp->next = NULL;
-        temp->data = NULL;
-        ff->next = temp;
-        ff = ff->next;
-    }
+    //put file node in binary tree
+    root = insert(root,id);
+    printf("root is currently %d\n",root->ID);
 
-    //put word in seg order
-    //search_data(ff->data,seg);
-     
-
+    //find file node to insert seg
+    struct file_node * c = root;
+    c = find_node(root,id);
+    printf("root is currently %d\n",c->ID);
+    
+    //inserting seg in file node binary tree
+    c->data = data_insert(c->data,seg,word);
+    return root;
 }
 
-//traverse binary tree to see if it contains node with seg ID
-struct node * search_data(struct node * n,int ID){
-    int check = 0;
-    //find node with matcing id or NULL end of list
-    while(n != NULL && check != 1){
-        if(n->segID = ID){
-            check = 1;
-        }
-        else{
-            //n = n->next;
-        }
-        if(n = NULL){
-            //create new node
-        }
-        else{
-            //end of function
-        }
-    }
-    return NULL;
-}
+int main(){
+struct file_node *root = NULL;
+
+root = parse_message(root,"1111.13.100.bleh");
+root = parse_message(root,"1111.15.101.bleh");
+root = parse_message(root,"1111.2222.102.bleh");
+root = parse_message(root,"1111.2222.103.bleh");
+root = parse_message(root,"1111.2224.104.bleh");
+root = parse_message(root,"1111.13.105.bleh");
+root = parse_message(root,"1111.2222.106.bleh");
+root = parse_message(root,"1111.1012.107.bleh");
+
+root = parse_message(root,"1111.2222.100.a");
+root = parse_message(root,"1111.2222.101.b");
+root = parse_message(root,"1111.2222.102.c");
+root = parse_message(root,"1111.2222.103.d");
+root = parse_message(root,"1111.2222.104.e");
+root = parse_message(root,"1111.2222.105.f");
+root = parse_message(root,"1111.2222.106.g");
+
+insertorder(root);
+root = root->right;
+root = root->right;
+root = root->left;
+printf("\n");
+data_insert_order(root->data);
 
 
 
-    //find the corrosponding file node in linked list to dataseg
-    //returns file node that has matching file ID
-struct file_node * find_file_node(struct file_node * f, int ID){
-    int check = 0;
-    while(check != 1 && f != NULL){
-        if(f->fileID == ID){
-            check = 1;
-        }
-        else{
-            f = f->next;
-        }
-    }
-    if(f == NULL){
-        return NULL;
-    }
-    else{
-        return f;
-    }
+return 0;
 }
