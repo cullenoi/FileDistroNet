@@ -3,26 +3,17 @@
 #include "PublicDef.h"
 #include <pthread.h>
 
-#include <iostream>
-#include <vector>
-#include <string>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-
-#include "Node/Tracker.h"
-#include "Node/Node.h"
-#include "Node/Routing.h"
+// #include <iostream>
+// #include <vector>
+// #include <string>
+// #include <string.h>
+// #include <stdlib.h>
+// #include <stdio.h>
 
 
 
-// Globals...
-///////////////////////////////////////////////NODE GLOBAL var
-Node N1;
-node * list ;
-node * curr;
-edge ** e_arr;
-edge * e_head;
+
+
 
 
 typedef struct argy {
@@ -49,11 +40,7 @@ pthread_mutex_t mutex;
 int err=0;
 void *ServerT( void* A){
     printf("IN server\n");
-    argy *B = (argy *)A;
-    int addr= B->portptr;
-     node * node_list = B->node_list;
-    edge ** edge_list = B->edge_list; 
-    dataset* data_file = B->data_file;
+  
     if(listen(sockfd,BACKLOG)<0)//-1 = errno
     {
         printf("INIT_Server socket Listening failed...\n");
@@ -74,7 +61,6 @@ while(1){
     //TODO simple messaging for DEV Please remove afterusage....
     }
     printf("all is well! :))\n");
-    free(B);
     return 0;
 }
 

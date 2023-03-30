@@ -1,4 +1,34 @@
-#include "PublicDef.h"
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <string.h>
+#include <strings.h> // bzero()
+#include <netinet/in.h>
+#include <unistd.h> // read(), write(), close()
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/wait.h>
+#include <signal.h>
+#include <sys/select.h>
+
+
+ int sockfd , talkfd ;//SOCKET FILE DESCRIPTOR returns -1 on errno
+ struct sockaddr_in Chints;
+ struct sockaddr_in their_addr;
+ socklen_t addr_size;
+
+
+#define _SS_PAD1SIZE 3000
+#define BACKLOG 10   // how many pending connections queue will hold
+#define MAX 100
+#define SA struct sockaddr
+
+#define PORT_server '33300'
+char* servip = "10.35.70.10";
 #include <stdio.h>
 
 
@@ -17,21 +47,21 @@ int main(){
 
 
     // Fetching port number
-    int PORT_server;
+    // int PORT_server;
 
-    // IN PEER WE TRUST
-    printf("Enter the port to send message:"); // Considering each peer will enter different port
-    scanf("%d", &PORT_server);
+    // // IN PEER WE TRUST
+    // printf("Enter the port to send message:"); // Considering each peer will enter different port
+    // scanf("%d", &PORT_server);
 
-    int sock = 0, valread;
+    int Csockfd = 0, valread;
     struct sockaddr_in serv_addr;
     char hello[1024] = {0};
 //  memset(&Chints, 0, sizeof Chints);//resets the struct so its not holding any memory.. 
     Chints.sin_family = AF_INET;//Sets this to IPV4
     // = SOCK_STREAM;//TCP
     Chints.sin_port = htons(PORT_server);//COnverts to big endian format.. Good practice
-    Chints.sin_addr.s_addr = INADDR_ANY;
-
+    Chints.sin_addr.s_addr = inet_addr(servip);//Change here
+    memset(Chints.sin_zero, '\0', sizeof Chints.sin_zero); //OLD APPROACH
  
 
 //create a socket from the info found 
@@ -39,12 +69,14 @@ if( (Csockfd = socket(AF_INET,SOCK_STREAM,0))<0){ //Lets you choose TCP||UDP STR
         fprintf(stderr,"ERROR Client getting socket: %s\n",gai_strerror(Csockfd));
         return 1;//returning one as error check in main..
    }
-int force =1;
- if (setsockopt(Csockfd, SOL_SOCKET,SO_REUSEADDR, &force, sizeof(force)))//FORCES THIS SOCKET FD TO THE PORT
-    {
-        perror("setsockopt");
-        exit(EXIT_FAILURE);
-    }
+// int force =1;
+//  if (setsockopt(Csockfd, SOL_SOCKET,SO_REUSEADDR, &force, sizeof(force)))//FORCES THIS SOCKET FD TO THE PORT
+//     {
+//         perror("setsockopt");
+//         exit(EXIT_FAILURE);
+//     }
+//Try bind instead of connect
+bind(Csockfd, (struct sockaddr *)&Chints, sizeof Chints);
 
 if (connect(Csockfd, (struct sockaddr *)&Chints,sizeof Chints) == -1) {
             close(Csockfd);
@@ -55,7 +87,7 @@ if (connect(Csockfd, (struct sockaddr *)&Chints,sizeof Chints) == -1) {
 //TODO: Remove this later just for DEBUGging
 // inet_ntop(Cres->ai_family, get_in_addr((struct sockaddr *)Cres->ai_addr),
 //             s, sizeof s);
-    printf("client: connecting to %s\n", s);
+    printf("client: connecting to PI\n");
 
 
 

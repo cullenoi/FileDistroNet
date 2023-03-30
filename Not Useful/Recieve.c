@@ -1,11 +1,39 @@
-#include "PublicDef.h"
 
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <string.h>
+#include <strings.h> // bzero()
+#include <netinet/in.h>
+#include <unistd.h> // read(), write(), close()
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/wait.h>
+#include <signal.h>
+#include <sys/select.h>
+
+
+ int sockfd , talkfd ;//SOCKET FILE DESCRIPTOR returns -1 on errno
+ struct sockaddr_in hints;
+ struct sockaddr_in their_addr;
+ socklen_t addr_size;
+
+
+#define _SS_PAD1SIZE 3000
+#define BACKLOG 10   // how many pending connections queue will hold
+#define MAX 100
+#define SA struct sockaddr
+
+#define PORT '33300'
+char* servip = "10.35.70.10";
 int main()
 {
     int force =1;
-  printf("Enter your port number:");
-    scanf("%d", &PORT);
+//   printf("Enter your port number:");
+//     scanf("%d", &PORT);
     // struct sigaction sa;
     // int yes=1;
     // int rv1;
