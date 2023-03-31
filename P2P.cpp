@@ -290,7 +290,8 @@ void Recieve(unsigned address, dataset * data_file, node * node_list, edge ** ed
 int ClientCreate(int PORT_server,char *buffer)
 {
     printf("In CLIENT\n");
-
+    int con_counter = 0;
+attempt:  //THis is for the error handling if it cant connect it will try 3 times before reporting an error and returing to the main function.
 int Csockfd =99;//SOCKET FILE DESCRIPTOR returns -1 on errno
     struct sockaddr_in Chints;// was using the addrinfo but doesnt work for single networking..
     char s[INET6_ADDRSTRLEN];//have it as length ipv6 incase good practise
@@ -322,8 +323,14 @@ int force =1;
 
 if (connect(Csockfd, (struct sockaddr *)&Chints,sizeof Chints) == -1) {//connecting
             close(Csockfd);
-            perror("ERROR client: connect");
-			return 1;
+            perror("ERROR client: connect attempting again");
+            if(con_counter <3){//do this 3 times to try connect to something
+            con_counter++;
+            goto attempt;
+            }
+			return 1;//Start looping here
+    //So when failed return a one that would need a controller tho 
+    // SO what we scould do is make a case
 }
 printf("CLIENT FINE\n");
 //TODO: Remove this later just for DEBUGging
