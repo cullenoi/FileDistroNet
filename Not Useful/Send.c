@@ -1,5 +1,4 @@
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -26,8 +25,8 @@
 #define BACKLOG 10   // how many pending connections queue will hold
 #define MAX 100
 #define SA struct sockaddr
-
-#define PORT_server '33300'
+int PORT_server;
+// #define PORT_server '33300'
 char* servip = "10.35.70.10";
 #include <stdio.h>
 
@@ -60,7 +59,7 @@ int main(){
     Chints.sin_family = AF_INET;//Sets this to IPV4
     // = SOCK_STREAM;//TCP
     Chints.sin_port = htons(PORT_server);//COnverts to big endian format.. Good practice
-    Chints.sin_addr.s_addr = inet_addr(servip);//Change here
+    Chints.sin_addr.s_addr = inet_addr(servip);//Change here - inaddr_any 
     memset(Chints.sin_zero, '\0', sizeof Chints.sin_zero); //OLD APPROACH
  
 
