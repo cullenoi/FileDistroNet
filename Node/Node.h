@@ -63,7 +63,9 @@ class Node {
         char * return_file_seg(int dest_port, int file_id, int file_seg);
 
         int book_update(int node_id, int action);
-        
+
+        int edge_update(int new_node, int connection, int action, int qual);
+
         int share_file();
 
         int add_file(char * dataseg);

@@ -182,6 +182,7 @@ int Node::book_update(int node_id, int action){
         new_node->next = temp;
         // set new node as head of addressbook
         address_book = new_node;
+        printf("Node %i successfully added from address book\n", node_id);
     }
     else {
         // Remove node.
@@ -192,12 +193,64 @@ int Node::book_update(int node_id, int action){
                 curr->next = temp;
                 curr->next = curr->next->next;
                 delete(temp);
+                printf("Node %i successfully removed from address book\n", node_id);
             }
         }
     }
     printf("Nodes updated\n");
     return 1;
-}  
+} 
+
+int Node::edge_update(int new_node, int connection, int action, int qual){
+    // if adding action to list.
+    edge * adj_head;
+    if(action){
+        edge * D1 = (edge*)malloc(sizeof(edge));
+        edge * D2 = (edge*)malloc(sizeof(edge));
+        // connection going from D1 -> D2
+        adj_head = edge_list[new_node];
+        if(adj_head)
+            D2->e_next = adj_head;
+        edge_list[new_node] = D2;
+        D2->id = connection;
+        D2->weight = qual;
+        // conneciton going from D2 -> D1
+        adj_head = edge_list[connection];
+        if(adj_head)
+            D1->e_next = adj_head;
+        edge_list[connection] = D1;
+        D1->id = new_node;
+        D1->weight = qual;
+        printf("Connection acknowledged: %i <-> %i\n", new_node, connection);
+    }
+    else{
+        // remove instances of new_node & connection from edge_list.
+        remove_edge(edge_list, new_node, connection);
+        remove_edge(edge_list, connection, new_node);
+    }
+}
+
+void remove_edge(edge * edge_list[], int D1, int D2){
+    edge * adj_head = edge_list[D1];
+    edge * curr, * prev;
+    curr = adj_head;
+    //special case for if struct for removal is head...
+    if(adj_head->id == D2){
+        adj_head = curr->e_next;
+        delete(curr);
+    } else {
+        while(curr){
+            if(curr->id == D2){
+                prev->e_next = curr->e_next;
+                delete(curr);
+                printf("%i <-> %i connection removed\n", D1, D2);
+                break;
+            }
+            prev = curr;
+            curr = curr->e_next;
+        }
+    }
+}
 
 int Node::add_file(char * dataseg){ 
     //create new data package...
@@ -281,14 +334,18 @@ char * Node::return_file_seg(int dest_port, int file_id, int file_seg){
             sprintf(buffer, "%i", dest_port);
             strcat(data_seg,buffer);
             strcat(data_seg, ".");
+           
             sprintf(buffer, "%i", curr->id);
             strcat(data_seg, buffer);
             strcat(data_seg, ".");
+            
             sprintf(buffer, "%i", curr->seg);
             strcat(data_seg, buffer);
             strcat(data_seg, ".");
+            
             strcpy(buffer, curr->word);
             strcat(data_seg, buffer);
+           
             return data_seg;
         }
         curr = curr->next;

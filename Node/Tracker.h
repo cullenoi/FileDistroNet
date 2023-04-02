@@ -31,6 +31,9 @@ typedef struct NETWORK{
     edge ** E;
 } NETWORK;
 
+
+// construct list update message
+char * list_update(int dest, int cmd, int new_node, int connect, int qual);
 // add a node to the node list
 void list_add(node * new_node, node * head);
 

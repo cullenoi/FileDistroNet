@@ -4,35 +4,77 @@
 
 #include "Tracker.h"
 
-// void list_add(node * new_node, node * head){
+#define MX_MSG_LEN 20
+#define LIST_ADD "0001"
+#define LIST_REMOVE "0002"
+#define VOID_SEG "000"
 
-//     node * temp = head;
-//     head = new_node;
-//     head->next = temp;
-// }
+// construct list update message
+char * list_update(int dest, int cmd, int new_node, int connect, int qual){
 
-// void list_remove(node * old_node, node * head){
+    char msg[MX_MSG_LEN];
+    char buffer[MX_MSG_LEN];
+    
+    sprintf(buffer, "%i", dest);
+    strcat(msg, buffer);
+    strcat(msg, ".");
+    // add/remove node command
+    // using cmd as a bool condition
+    (cmd) ? strcat(msg, LIST_ADD):strcat(msg, LIST_REMOVE);
+    strcat(msg, "|");
 
-//     node * curr = head;
-//     node * prev; 
-//     if(head->id == old_node->id){
-//         prev = head;
-//         head->next = head;
-//         dalloc_node(prev);
-//     }
-//     while(curr->next != NULL){
-//         if(curr->id == old_node->id){
-//             prev->next = curr->next;
-//             dalloc_node(curr);
-//             printf("Node succesfully removed from list... data re-allocated\n");
-//             return;
-//         }
-//         prev = curr;
-//         curr = curr->next;
-//     }
-//     printf("Error: node not found (list_remove)\n");
-//     return;
-// }
+    strcat(msg, VOID_SEG);
+    strcat(msg, "|");
+
+    //TODO
+    //xxxx.yyyy.zzz
+    sprintf(buffer, "%i", new_node);
+    strcat(msg, buffer);
+    strcat(msg, ".");
+    sprintf(buffer, "%i", connect);
+    strcat(msg, buffer);
+    strcat(msg, ".");
+    sprintf(buffer, "%i", qual);
+    strcat(msg, "\0");
+}
+void list_add(node * n_head, edge ** e_head, int new, int connect, int qual){
+
+    // Node list
+
+    node * temp = n_head;
+    // create new node struct
+    node * new_node = (node*)malloc(sizeof(node));
+    // assign values
+    new_node->id = new;
+    new_node->next = temp;
+    // assign new head of the list
+    n_head = new_node;
+
+    // Edge list
+}
+
+void list_remove(node * old_node, node * head){
+
+    node * curr = head;
+    node * prev; 
+    if(head->id == old_node->id){
+        prev = head;
+        head->next = head;
+        dalloc_node(prev);
+    }
+    while(curr->next != NULL){
+        if(curr->id == old_node->id){
+            prev->next = curr->next;
+            dalloc_node(curr);
+            printf("Node succesfully removed from list... data re-allocated\n");
+            return;
+        }
+        prev = curr;
+        curr = curr->next;
+    }
+    printf("Error: node not found (list_remove)\n");
+    return;
+}
 
 // finds the node with the highest weighting...
 // i.e. the node of which to distribute for a certain segment of a certain file...
@@ -51,9 +93,7 @@ int rendezvous(int file_key, int file_seg, node * head, int self){
         }
         curr = curr->next;
     }
-
     return best_node;
-
 }
 
 // devolops a hash key based on the file, file segment, and target node...
