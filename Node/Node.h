@@ -65,10 +65,11 @@ class Node {
         int book_update(int node_id, int action);
 
         int edge_update(int new_node, int connection, int action, int qual);
+      
+        char * share_file(dataset * file, int seg, int seg_size, int index,
+                          node * node_list, int address);
 
-        int share_file();
-
-        int add_file(char * dataseg);
+        int add_file(char * dataseg, dataset * data_file);
 
         // getters 
 
@@ -77,6 +78,7 @@ class Node {
         edge ** get_edge_list();
         dataset * get_file();
         dataset * get_data_list();
+        int * get_map();
 
 };
 
