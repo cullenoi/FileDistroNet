@@ -9,6 +9,9 @@
 #include "Node.h"
 #include "Routing.h"
 
+#define REQUEST 0
+#define RECEIVE 1
+
 #define IP_LEN 20
 #define MX_STR_LEN 100
 #define ROW_LEN 80
@@ -43,13 +46,19 @@ int Node::init_node(char * argv[]){
     edge_list = load_edges(argv[4]);
     printf("Loading list of files...\n");
     load_files(argv[5]);
+    printf("Calculating static map...\n");
+    map = shortest_path(address, edge_list, address_book);
     return 1;
 }
 
 int Node::load_node_info(char *fname){
     FILE * csv = fopen(fname, "r");
+    if(csv == NULL){
+          printf ("@rror\n");
+        exit (1);
+    }
     // set check var
-    file->id = 0;
+    file->id = 69;//possible point
     char row[ROW_LEN];
     char * token;
     fgets(row, ROW_LEN, csv);
@@ -182,6 +191,7 @@ int Node::book_update(int node_id, int action){
         new_node->next = temp;
         // set new node as head of addressbook
         address_book = new_node;
+        printf("Node %i successfully added from address book\n", node_id);
     }
     else {
         // Remove node.
@@ -192,88 +202,168 @@ int Node::book_update(int node_id, int action){
                 curr->next = temp;
                 curr->next = curr->next->next;
                 delete(temp);
+                printf("Node %i successfully removed from address book\n", node_id);
             }
         }
     }
     printf("Nodes updated\n");
     return 1;
-}  
+} 
 
-int Node::add_file(char * dataseg){ 
+int Node::edge_update(int new_node, int connection, int action, int qual){
+    // if adding action to list.
+    edge * adj_head;
+    if(action){
+        edge * D1 = (edge*)malloc(sizeof(edge));
+        edge * D2 = (edge*)malloc(sizeof(edge));
+        // connection going from D1 -> D2
+        adj_head = edge_list[new_node];
+        if(adj_head)
+            D2->e_next = adj_head;
+        edge_list[new_node] = D2;
+        D2->id = connection;
+        D2->weight = qual;
+        // conneciton going from D2 -> D1
+        adj_head = edge_list[connection];
+        if(adj_head)
+            D1->e_next = adj_head;
+        edge_list[connection] = D1;
+        D1->id = new_node;
+        D1->weight = qual;
+        printf("Connection acknowledged: %i <-> %i\n", new_node, connection);
+    }
+    else{
+        // remove instances of new_node & connection from edge_list.
+        remove_edge(edge_list, new_node, connection);
+        remove_edge(edge_list, connection, new_node);
+    }
+}
+
+void remove_edge(edge * edge_list[], int D1, int D2){
+    edge * adj_head = edge_list[D1];
+    edge * curr, * prev;
+    curr = adj_head;
+    //special case for if struct for removal is head...
+    if(adj_head->id == D2){
+        adj_head = curr->e_next;
+        delete(curr);
+    } else {
+        while(curr){
+            if(curr->id == D2){
+                prev->e_next = curr->e_next;
+                delete(curr);
+                printf("%i <-> %i connection removed\n", D1, D2);
+                break;
+            }
+            prev = curr;
+            curr = curr->e_next;
+        }
+    }
+}
+
+int Node::add_file(char * dataseg, dataset * data_file){ 
     //create new data package...
     dataset * new_data = (dataset*)malloc(sizeof(dataset));
     new_data->word = (char*)malloc(MX_STR_LEN * sizeof(char));
-    if(data){
+    if(data_file){
         // add datagram to the list of data
-        new_data->next = data;
+        new_data->next = data_file;
     }
-    data = new_data;
+    data_file = new_data;
+    char * parse = (char*)malloc(MX_STR_LEN * sizeof(char));
     // parse msg
-    char * parse = strtok(dataseg, ".");
+    parse = strtok(dataseg, ".");
     printf("Adding file to node %s..", parse);
     // read in file ID
     parse = strtok(NULL, ".");
-    data->id = atoi(parse);
+    data_file->id = atoi(parse);
     // read in seg ID
     parse = strtok(NULL, ".");
-    data->seg = atoi(parse);
+    data_file->seg = atoi(parse);
     // read in data
     parse = strtok(NULL, "\0");
-    strcpy(data->word, parse);
+    strcpy(data_file->word, parse);
 
-    printf(" file read in\n");
+    printf(" file read in\n\n\n");
 
     return 1;
 
 }
 
-int Node::share_file(){
+char * Node::share_file(dataset * file, int seg, int seg_size, int index, int dest){
     // parse the file into x amount of pieces.
-    printf("create data packets\n");
-    int seg = 100;
-    int num_of_segs = 10;
-    int seg_size = file->char_count/num_of_segs;
-    int index = 0;
-    for(int i=0; i<num_of_segs; i++){
+    printf("create data packet: %i\n", seg);
+    char point = '|';
 
-        string msg;
-        msg = msg + to_string(rendezvous(file->id, (seg+i),
-                              address_book, address));
-        // cout << msg << endl;
-        msg = msg + "." + to_string(file->id);
-        // cout << msg << endl;
-        msg = msg + "." + to_string(seg + i) + ".";
-        //cout << msg << endl;
+    char * msg = (char*)malloc(MX_STR_LEN * sizeof(char));
+    if(msg ==NULL){
+        printf("ERROR IN MSG L242\n");
+    }
+    //memset(msg, 0, strlen(msg));//sets to null
+    char * int_char = (char*)malloc(10*sizeof(char));
+    if(int_char==NULL){
+        printf("ERROR MEM L248\n");
+    }
+    memset(int_char,0,10*sizeof(char));
+    memset(msg,0,sizeof(char)*MX_STR_LEN);
 
-        // read in data
+    // add appropriate dest port from array
+    sprintf(int_char, "%d", dest);
+    strcat(msg, int_char);
+    strcat(msg, &point);
+    // declare this is a 'send' msg
+    sprintf(int_char, "%d", RECEIVE);
+    strcat(msg, int_char);
+    strcat(msg, &point);
+    //printf("%s\n", msg);
+    // cout << msg << endl;
+    sprintf(int_char, "%d", file->id);
+    strcat(msg, int_char);
+    strcat(msg, &point);
+    //printf("%s\n", msg);
+    // cout << msg << endl;
+    sprintf(int_char, "%d", seg);
+    strcat(msg, int_char);
+    strcat(msg, &point);
+    //printf("%s\n", msg);
+    //cout << msg << endl;
 
-        if(i == num_of_segs-1){
-            for(int j=index; j<file->char_count; j++){
-                msg = msg + file->word[j];
-            }
-            index = index + seg_size;
-            cout << msg << endl;
+    // // read in data
+    //char * buffer = (char*)malloc(seg_size * sizeof(char));
+    char buffer;
+    char end = '\0';
+    //printf("%s\n", msg);
+    if(seg == 109){
+        int i = 0;
+        for(int j=index; j<file->char_count; j++){
+            buffer = file->word[j];
+            strcat(msg, &buffer);
         }
-        else{
-            for(int j=index; j<index+seg_size; j++){
-                msg = msg + file->word[j];
-            }
-            index = index + seg_size;
-            cout << msg << endl;
+        strcat(msg, &end);
+        //printf("%s\n", msg);
+        free(int_char);
+        return msg;
+    }
+    else{
+        for(int j=index; j<index+seg_size; j++){
+            buffer = file->word[j];
+            strcat(msg, &buffer);
         }
-        
+        strcat(msg, &end);
+        //printf("%s\n", msg);
+        free(int_char);
+        return msg;
+    }
+    
     }
     // special case final seg.
 
-
-    return 1;
-}
 
 // getters
 
 char * Node::return_file_seg(int dest_port, int file_id, int file_seg){
     dataset * curr = data;
-    char data_seg[MX_STR_LEN];
+    char * data_seg = (char*)malloc(MX_STR_LEN*sizeof(char));
     char buffer[MX_STR_LEN];
     while(curr){
         if(curr->id == file_id && curr->seg == file_seg){
@@ -298,13 +388,16 @@ char * Node::return_file_seg(int dest_port, int file_id, int file_seg){
 
 }
 
+// getters
+
 unsigned Node::get_address(){return address;}
 node * Node::get_node_list(){return address_book;}
 edge ** Node::get_edge_list(){return edge_list;}
 dataset * Node::get_file(){return file;}
 dataset * Node::get_data_list(){return data;}
+int * Node::get_map(){return map;}
 
-
+/*
 int main(int argc, char *argv[]){
 	Node N1;
 	if(!N1.init_node(argv)){
@@ -335,7 +428,7 @@ int main(int argc, char *argv[]){
     printf("\nshortest path proof\n\n");
     cout << "Destination: ";
     cin >> end;
-    if(end == N1.get_address()){
+    if((end == N1.get_address()){
         printf("Already at node\n");
     }
     else{
@@ -358,7 +451,7 @@ int main(int argc, char *argv[]){
    
     return 0;
 }
-
+*/
 
 // nodes know about other nodes throught the 'address book', DHT
 // the DHT could be organised by a central authourity but for the purpose and functionality of this network

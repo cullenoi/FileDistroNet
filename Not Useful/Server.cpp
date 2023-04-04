@@ -68,6 +68,14 @@ Recieve(talkfd);
 close(sockfd);// Command exits as connection is finished..
     //TODO//
     // simple messaging for DEV Please remove afterusage....
+Recieve(talkfd);
+close(sockfd);// Command exits as connection is finished..
+    //TODO//
+    // simple messaging for DEV Please remove afterusage....
+}
+return 0; // all ran smoothly server is going to sleep
+}
+
 }
 return 0; // all ran smoothly server is going to sleep
 }

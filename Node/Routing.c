@@ -127,7 +127,7 @@ int min_distance(int dist[], node * prev[]){
     return min_index;
 }
 // prints the shortest path between startNode and endNode, if there is any
-int shortest_path(int startNode, int endNode, edge ** e_list, node * n_list){
+int * shortest_path(int startNode, edge ** e_list, node * n_list){
     //dijkstra algorithm..
     //init
     create_N_List(n_list);
@@ -162,15 +162,18 @@ int shortest_path(int startNode, int endNode, edge ** e_list, node * n_list){
     //     printf("Dist from star to end = %i\n", dist[endNode]);
     // else printf("No route!\n");
 
-    int next_hop;
-    u = endNode;
-    while(u != startNode){
-        next_hop = u;
-        u = map[u];
-    }
 
+    // return next hop...
+    // int next_hop;
+    // u = endNode;
+    // while(u != startNode){
+    //     next_hop = u;
+    //     u = map[u];
+    // }
+
+    // return map array...
     free_memory();
-    return next_hop;
+    return map;
     
     // stack for printing..
     // q->head = N_List[u];
@@ -194,13 +197,13 @@ int shortest_path(int startNode, int endNode, edge ** e_list, node * n_list){
 void free_memory ( void ) {
     edge * curr, * temp;
     free(q);
-    for(int i=0; i<nList_size; i++){
-        free(N_List[i]);
-        // curr = EdgeList[i];
-        // while(curr){
-        //     temp = curr;
-        //     curr = curr->e_next;
-        //     free(temp);
-        // }
-    }
+    // for(int i=0; i<nList_size; i++){
+    //     free(N_List[i]);
+    //     // curr = EdgeList[i];
+    //     // while(curr){
+    //     //     temp = curr;
+    //     //     curr = curr->e_next;
+    //     //     free(temp);
+    //     // }
+    // }
 }
