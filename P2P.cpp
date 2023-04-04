@@ -197,7 +197,7 @@ return 0;
 
 
 
-void Recieve(unsigned address, dataset * data_file, node * node_list, edge ** edge_list)// delete after usage..
+void Recieve(unsigned address, dataset * data_file, int * map)// delete after usage..
 {
     
     fd_set active, read;
@@ -255,7 +255,24 @@ void Recieve(unsigned address, dataset * data_file, node * node_list, edge ** ed
 
 
                     if(REC_PORT == PORT)//Meant to be here 
-                    {
+                    {   
+                        printf("Message in: %s ", buff);
+                        // Check if msg is request or receive
+                        if(PortParser(buff)){
+                            // message is for receiving
+                        } else {
+                            // message is a request
+                            // search the data structure for the file seg
+                            /*
+                             * if(file_search()){
+                                ClientCreate(client, data);
+                             } else{
+                                construct error case
+                                DEST|2|FileID|PortID|PORT
+                             }
+                            */
+                        }
+
                         int l = 0;
                         printf("Recieved Package!\n");
                         if(l = N1.add_file(buff, data_file)!=1)printf("Error on adding file to NODE Struct\n");//THis adds the file to a piece of memory like a pointer (NODES.CPP)
@@ -267,7 +284,7 @@ void Recieve(unsigned address, dataset * data_file, node * node_list, edge ** ed
                         // edge ** e_list = X.get_edge_list;
                         // node * n_list = X.get_node_list;
                         printf("INT CHECK == %d\n",NEXT_PORT);
-                        NEXT_PORT = shortest_path(PORT,REC_PORT,edge_list,node_list); //FIND NEXT BEST PLACE TO MOVE ON
+                        NEXT_PORT = map[REC_PORT]; //FIND NEXT BEST PLACE TO MOVE ON
                         printf("INT CHECK == %d\n",NEXT_PORT);
                         ClientCreate(NEXT_PORT,buff);//send it to this address and next port.
                     }//
@@ -289,7 +306,7 @@ int ClientCreate(int PORT_server,char *buffer)
 {
     printf("In CLIENT\n");
 
-int Csockfd =99;//SOCKET FILE DESCRIPTOR returns -1 on errno
+    int Csockfd =99;//SOCKET FILE DESCRIPTOR returns -1 on errno
     struct sockaddr_in Chints;// was using the addrinfo but doesnt work for single networking..
     char s[INET6_ADDRSTRLEN];//have it as length ipv6 incase good practise
     int yes =99;//DEFINING RANDOM NUMBERS
@@ -304,8 +321,6 @@ int Csockfd =99;//SOCKET FILE DESCRIPTOR returns -1 on errno
     Chints.sin_port = htons(PORT_server);//COnverts to big endian format.. Good practice
     Chints.sin_addr.s_addr = INADDR_ANY;
 
- 
-}
 //create a socket from the info found 
 if( (Csockfd = socket(AF_INET,SOCK_STREAM,0))<0){ //Lets you choose TCP||UDP STREAM||DATAGRAM AI_INET||AI_INET6(Ip_addresse types..)
         fprintf(stderr,"ERROR Client getting socket: %s\n",gai_strerror(Csockfd));
@@ -351,6 +366,8 @@ unsigned long ha =(MAX);
 	close(Csockfd);
  return 0;   
 	
+}
+
 }
 //NOTE SHOULD PASS IN NODE ADDRESSLIST
 void FileDistro(dataset * file, int address, node * node_list, int * map){

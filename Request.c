@@ -29,7 +29,7 @@ void RequestFile(int file_id, node * node_list, int * map, int self){
     }
 }
 
-char * ReqAssemble(int file_id, int seg, int dest, int * map){
+char * ReqAssemble(int client, int file_id, int seg, int dest, int * map){
     // assemble message
     char sep = '|';
     char * msg = (char*)malloc(MX_STR_LEN * sizeof(char));
@@ -51,7 +51,11 @@ char * ReqAssemble(int file_id, int seg, int dest, int * map){
     sprintf(buff, "%i", seg);
     strcat(msg, buff);
     strcat(msg, &sep);
+    // client port
+    sprintf(buff, "%i", client);
+    strcat(msg, buff);
 
+    free(buff);
     // return constructed request
     return msg;
 }
