@@ -138,6 +138,7 @@ printf("\nPlease Select the following options: >>>\n1.Publish File\n0.Quit\n Or 
             
         case 2:
             printf("Requesting FILE NOT YET ADDED\n Please try again.");
+            //Fileid
             break;
         case 0:
             printf("\nLeaving\n");
@@ -153,12 +154,33 @@ pthread_mutex_destroy(&mutex);
 
 }
 
+
+//File ID
+// AH ENTER FILE NUMBER
+// SCANFS the us
+// CALLL CHECK SEGV_MTESERR
+
+
+// WHILE NOT ALLL SEGS [PRESENT] WAIT 3S AND THEN CHEACH BST (NUGGY)
+
+// WHEN ALL PRESENT 
+// break;
+
+// BUILD
+// //
+
+
+// CHECK SEGS
+// GOES THROUGH NUGGET BST AND SEES WHAT SEGS WE ALREADY HAVE 
+// LOOPING FUNCTION WHICH CALLS MESSAGE MAKER (FILE DISTRO) AND THEN CALLS SEND MESSAGE TO Client_h
+
+
+
+
+
 int Server()
 {
-    // int sockfd , talkfd ;//SOCKET FILE DESCRIPTOR returns -1 on errno
-    // struct sockaddr_in hints;
-    // struct sockaddr_storage their_addr;
-    // socklen_t addr_size;
+    
 
     int force =1;
 //     char *usrname =get_name    
@@ -261,7 +283,8 @@ void Recieve(unsigned address, dataset * data_file, node * node_list, edge ** ed
                         int l = 0;
                         printf("Recieved Package!\n");
                         if(l = N1.add_file(buff, data_file)!=1)printf("Error on adding file to NODE Struct\n");//THis adds the file to a piece of memory like a pointer (NODES.CPP)
-                    }
+                    }   //IF FLAG
+                    //CALL SENDBACK(SEG NUMBER)
                     else
                     {//CONOR HELP WITH DEFS PLEASE HERE :)
                     //#FIXME: 
@@ -285,9 +308,15 @@ void Recieve(unsigned address, dataset * data_file, node * node_list, edge ** ed
     return;
 }
 
+//Send back (FILE SEG NUM ,Sendindging port , //IP )
+//find it in nugget make = to char pointer
+
+//then call client send
+
+
 ////////////Client Functions://///////////////////////////////////////////////////////////////
 
-int ClientCreate(int PORT_server,char *buffer)
+int ClientCreate(int PORT_server,char *buffer)//sender
 {
     printf("In CLIENT\n");
     int con_counter = 0;
@@ -328,7 +357,9 @@ if (connect(Csockfd, (struct sockaddr *)&Chints,sizeof Chints) == -1) {//connect
             con_counter++;
             goto attempt;
             }
+            else 
 			return 1;//Start looping here
+            //TODO Call connors delete branch function
     //So when failed return a one that would need a controller tho 
     // SO what we scould do is make a case
 }
@@ -394,6 +425,7 @@ void FileDistro(dataset * file, int address, node * node_list,
         ClientCreate(NEXT,message);
         index = index + seg_size;
         seg++;
+        free(message); //ADDED TUESDAY
     }
   
     return;
