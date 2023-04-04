@@ -9,6 +9,9 @@
 #include "Node.h"
 #include "Routing.h"
 
+#define REQUEST 0
+#define RECEIVE 1
+
 #define IP_LEN 20
 #define MX_STR_LEN 100
 #define ROW_LEN 80
@@ -43,6 +46,8 @@ int Node::init_node(char * argv[]){
     edge_list = load_edges(argv[4]);
     printf("Loading list of files...\n");
     load_files(argv[5]);
+    printf("Calculating static map...\n");
+    map = shortest_path(address, edge_list, address_book);
     return 1;
 }
 
@@ -285,11 +290,11 @@ int Node::add_file(char * dataseg, dataset * data_file){
 
 }
 
-char * Node::share_file(dataset * file, int seg, int seg_size, int index, 
-                        node * node_list, int address){
+char * Node::share_file(dataset * file, int seg, int seg_size, int index, int dest){
     // parse the file into x amount of pieces.
     printf("create data packet: %i\n", seg);
-    char point = '.';
+    char point = '|';
+
     char * msg = (char*)malloc(MX_STR_LEN * sizeof(char));
     if(msg ==NULL){
         printf("ERROR IN MSG L242\n");
@@ -301,10 +306,13 @@ char * Node::share_file(dataset * file, int seg, int seg_size, int index,
     }
     memset(int_char,0,10*sizeof(char));
     memset(msg,0,sizeof(char)*MX_STR_LEN);
-    //FIXME
-    //printf("%i, %i, %i, %i\n", file->id, seg, address, index);
-    int dest_port = rendezvous(file->id, seg, node_list, address);
-    sprintf(int_char, "%d", dest_port);
+
+    // add appropriate dest port from array
+    sprintf(int_char, "%d", dest);
+    strcat(msg, int_char);
+    strcat(msg, &point);
+    // declare this is a 'send' msg
+    sprintf(int_char, "%d", RECEIVE);
     strcat(msg, int_char);
     strcat(msg, &point);
     //printf("%s\n", msg);

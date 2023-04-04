@@ -66,8 +66,7 @@ class Node {
 
         int edge_update(int new_node, int connection, int action, int qual);
       
-        char * share_file(dataset * file, int seg, int seg_size, int index,
-                          node * node_list, int address);
+        char * share_file(dataset * file, int seg, int seg_size, int index, int dest);
 
         int add_file(char * dataseg, dataset * data_file);
 

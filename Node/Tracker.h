@@ -2,6 +2,8 @@
 #define MODULE_TRACKER
 
 #include <vector>
+
+#define REDUNDANCY 3
 // simulated package of data.
 typedef struct dataset{
     int id;
@@ -42,7 +44,7 @@ void list_add(node * new_node, node * head);
 void list_remove(node * old_node, node * head);
 
 // choose the node to send a segment of a file to... highest weighed node wins...
-int rendezvous(int file_key, int file_seg, node * head, int self);
+int * rendezvous(int file_key, int file_seg, node * head, int self);
  
 // hash function develops a int based on input parameters... aim to be as distributed as possible among all possible outcomes...
 int hash(int key, int seg, int node);

@@ -78,21 +78,50 @@ void list_remove(node * old_node, node * head){
 
 // finds the node with the highest weighting...
 // i.e. the node of which to distribute for a certain segment of a certain file...
-int rendezvous(int file_key, int file_seg, node * head, int self){
+int * rendezvous(int file_key, int file_seg, node * head, int self){
 
-    int best_node = 0, hash_val, best_hash = 0;
+    // lists: index 0 has the highest value, index 1 has the second highest value...
+    int best_node[REDUNDANCY] = {0,0,0};
+    int best_hash[REDUNDANCY] = {0,0,0};
+    int hash_val;
     node * curr = head;
     while(curr->next->id != 0){
         if(curr->id != self){
             hash_val = hash(file_key, file_seg, curr->id);
-            if(hash_val > best_hash){
-                best_node = curr->id;
-                best_hash = hash_val;
+            if(hash_val > best_hash[0]){
+                // node...
+                // shift lists down by one.
+                best_node[2] = best_node[1];
+                best_node[1] = best_node[0];
+                // hash...
+                // shift lists down by one.
+                best_hash[2] = best_hash[1];
+                best_hash[1] = best_hash[0];
+                //assign new value
+                best_node[0] = curr->id;
+                best_hash[0] = hash_val;
+                
+            }
+            else if(hash_val > best_hash[1]){
+                // node...
+                // shift lists down by one.
+                best_node[2] = best_node[1];
+                // hash...
+                // shift lists down by one.
+                best_hash[2] = best_hash[1];
+                //assign new value
+                best_node[1] = curr->id;
+                best_hash[1] = hash_val;
+            }
+            else if(hash_val > best_hash[2]){
+                //assign new value
+                best_node[2] = curr->id;
+                best_hash[2] = hash_val;
             }
         }
         curr = curr->next;
     }
-    return best_node;
+    return *best_node;
 }
 
 // devolops a hash key based on the file, file segment, and target node...

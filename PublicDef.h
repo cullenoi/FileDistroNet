@@ -32,8 +32,10 @@
 
 /// @brief CLIENT SIDE///// These could be made simply as called in function noneeed fr global
 int PORT;
-void FileDistro(dataset * file, int address, node * node_list,
-                int * map, edge ** edge_list);
+
+int ClientCreate(int PORT_server,char *buffer);
+
+void FileDistro(dataset * file, int address, node * node_list, int * map);
 
 int PortParser(char *buff);
 

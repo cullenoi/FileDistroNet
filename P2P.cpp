@@ -14,8 +14,6 @@
 #include "Node/Node.h"
 #include "Node/Routing.h"
 
-
-
 // Globals...
 ///////////////////////////////////////////////NODE GLOBAL var
 Node N1;
@@ -307,7 +305,7 @@ int Csockfd =99;//SOCKET FILE DESCRIPTOR returns -1 on errno
     Chints.sin_addr.s_addr = INADDR_ANY;
 
  
-
+}
 //create a socket from the info found 
 if( (Csockfd = socket(AF_INET,SOCK_STREAM,0))<0){ //Lets you choose TCP||UDP STREAM||DATAGRAM AI_INET||AI_INET6(Ip_addresse types..)
         fprintf(stderr,"ERROR Client getting socket: %s\n",gai_strerror(Csockfd));
@@ -355,9 +353,8 @@ unsigned long ha =(MAX);
 	
 }
 //NOTE SHOULD PASS IN NODE ADDRESSLIST
-void FileDistro(dataset * file, int address, node * node_list,
-                int * map, edge ** edge_list){//Generates the list of files and sends them
-    int i = 0;
+void FileDistro(dataset * file, int address, node * node_list, int * map){
+    //Generates the list of files and sends them
     //#FIXME:   
     //STEP 1 SPLITTING SEGMENT
     // STEP 2 IS ROUTING THE SEGMENT FINDING WHERE TO SEND IT FIRST
@@ -374,24 +371,24 @@ void FileDistro(dataset * file, int address, node * node_list,
         if(message==NULL){
             printf("Malloc Failed\n");
         }
-
-        message = N1.share_file(file, seg, seg_size, index,
-                                node_list, address);
-         //that makes string into segments and assigns the segments to portn numbers in the form "111.5345."ARG""
-        
-        printf("Finished assembling segment %i.\n", seg);
-        printf("%s\n\n", message);
-        int DEST_PORT = PortParser(message); 
-        int NEXT = shortest_path(address,DEST_PORT,edge_list,node_list);
-        printf("Send seg %i to port %i\n\n", seg, NEXT);
-        ClientCreate(NEXT,message);
+        // share multiple copies of each seg, for redundancy
+        // get a list of DEST nodes...
+        int * dest_port = rendezvous(file->id, seg, node_list, address);
+        for (int i=0; i<REDUNDANCY; i++){
+            message = N1.share_file(file, seg, seg_size, index, dest_port[i]);
+            //that makes string into segments and assigns the segments to portn numbers in the form "111.5345."ARG""
+            printf("Finished assembling segment %i.\n", seg);
+            printf("%s\n\n", message);
+            //int DEST_PORT = PortParser(message); 
+            int NEXT = map[dest_port[i]];
+            printf("Send seg %i to port %i\n\n", seg, NEXT);
+            ClientCreate(NEXT,message);
+        }
         index = index + seg_size;
         seg++;
     }
-  
     return;
 }
-
 
 int PortParser(char* buff){
     char * copy = (char*)malloc(MX_STR_LEN * sizeof(char));
