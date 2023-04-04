@@ -134,7 +134,8 @@ int * shortest_path(int startNode, edge ** e_list, node * n_list){
     q = create_queue();
     int dist[nList_size];
     node * prev[nList_size];
-    int map[nList_size];
+    // create pointer to memory, that will be returned
+    int * map = (int*)malloc(nList_size * sizeof(int));
 
     for(int i=0; i<nList_size; i++){
         dist[i] = __INT_MAX__; //set as 'unexplored'

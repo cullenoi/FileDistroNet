@@ -2,6 +2,7 @@
 #define NODE_H
 
 #define nList_size 5000
+#define fList_size 100
 #define MX_STR_LEN 100
 
 #include <string>
@@ -17,7 +18,7 @@ class Node {
         edge ** edge_list;
         dataset * data;
         dataset * file;
-        int file_list[100];
+        int file_list[fList_size];
         int * map;
         //book_date: yy/mm/dd/hh/mm/ss/..
         unsigned book_date;
@@ -69,12 +70,14 @@ class Node {
         char * share_file(dataset * file, int seg, int seg_size, int index, int dest);
 
         int add_file(char * dataseg, dataset * data_file);
-
+        
+        void printFileList();
         // getters 
 
         unsigned get_address();
         node * get_node_list();
         edge ** get_edge_list();
+        int * get_file_list();
         dataset * get_file();
         dataset * get_data_list();
         int * get_map();

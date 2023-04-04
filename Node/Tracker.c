@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <string.h>
 
 #include "Tracker.h"
 
@@ -37,21 +38,21 @@ char * list_update(int dest, int cmd, int new_node, int connect, int qual){
     sprintf(buffer, "%i", qual);
     strcat(msg, "\0");
 }
-void list_add(node * n_head, edge ** e_head, int new, int connect, int qual){
+// void list_add(node * n_head, edge ** e_head, int new, int connect, int qual){
 
-    // Node list
+//     // Node list
 
-    node * temp = n_head;
-    // create new node struct
-    node * new_node = (node*)malloc(sizeof(node));
-    // assign values
-    new_node->id = new;
-    new_node->next = temp;
-    // assign new head of the list
-    n_head = new_node;
+//     node * temp = n_head;
+//     // create new node struct
+//     node * new_node = (node*)malloc(sizeof(node));
+//     // assign values
+//     new_node->id = new;
+//     new_node->next = temp;
+//     // assign new head of the list
+//     n_head = new_node;
 
-    // Edge list
-}
+//     // Edge list
+// }
 
 void list_remove(node * old_node, node * head){
 
@@ -60,12 +61,12 @@ void list_remove(node * old_node, node * head){
     if(head->id == old_node->id){
         prev = head;
         head->next = head;
-        dalloc_node(prev);
+        free(prev);
     }
     while(curr->next != NULL){
         if(curr->id == old_node->id){
             prev->next = curr->next;
-            dalloc_node(curr);
+            free(curr);
             printf("Node succesfully removed from list... data re-allocated\n");
             return;
         }
@@ -81,7 +82,9 @@ void list_remove(node * old_node, node * head){
 int * rendezvous(int file_key, int file_seg, node * head, int self){
 
     // lists: index 0 has the highest value, index 1 has the second highest value...
-    int best_node[REDUNDANCY] = {0,0,0};
+    int  * best_node = (int*)malloc(REDUNDANCY * sizeof(int));
+    memset(best_node, 0, REDUNDANCY);
+
     int best_hash[REDUNDANCY] = {0,0,0};
     int hash_val;
     node * curr = head;
@@ -121,7 +124,7 @@ int * rendezvous(int file_key, int file_seg, node * head, int self){
         }
         curr = curr->next;
     }
-    return *best_node;
+    return best_node;
 }
 
 // devolops a hash key based on the file, file segment, and target node...

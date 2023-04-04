@@ -210,6 +210,28 @@ int Node::book_update(int node_id, int action){
     return 1;
 } 
 
+void remove_edge(edge * edge_list[], int D1, int D2){
+    edge * adj_head = edge_list[D1];
+    edge * curr, * prev;
+    curr = adj_head;
+    //special case for if struct for removal is head...
+    if(adj_head->id == D2){
+        adj_head = curr->e_next;
+        delete(curr);
+    } else {
+        while(curr){
+            if(curr->id == D2){
+                prev->e_next = curr->e_next;
+                delete(curr);
+                printf("%i <-> %i connection removed\n", D1, D2);
+                break;
+            }
+            prev = curr;
+            curr = curr->e_next;
+        }
+    }
+}
+
 int Node::edge_update(int new_node, int connection, int action, int qual){
     // if adding action to list.
     edge * adj_head;
@@ -237,28 +259,7 @@ int Node::edge_update(int new_node, int connection, int action, int qual){
         remove_edge(edge_list, new_node, connection);
         remove_edge(edge_list, connection, new_node);
     }
-}
-
-void remove_edge(edge * edge_list[], int D1, int D2){
-    edge * adj_head = edge_list[D1];
-    edge * curr, * prev;
-    curr = adj_head;
-    //special case for if struct for removal is head...
-    if(adj_head->id == D2){
-        adj_head = curr->e_next;
-        delete(curr);
-    } else {
-        while(curr){
-            if(curr->id == D2){
-                prev->e_next = curr->e_next;
-                delete(curr);
-                printf("%i <-> %i connection removed\n", D1, D2);
-                break;
-            }
-            prev = curr;
-            curr = curr->e_next;
-        }
-    }
+    return 1;
 }
 
 int Node::add_file(char * dataseg, dataset * data_file){ 
@@ -388,11 +389,21 @@ char * Node::return_file_seg(int dest_port, int file_id, int file_seg){
 
 }
 
+void Node::printFileList(){
+    // lazy method, but only runs once upon user input.
+    for(int i=0; i<fList_size; i++){
+        if(file_list[i]){
+            printf("File: %i\n", file_list[i]);
+        }
+    }
+}
+
 // getters
 
 unsigned Node::get_address(){return address;}
 node * Node::get_node_list(){return address_book;}
 edge ** Node::get_edge_list(){return edge_list;}
+int * Node::get_file_list(){return file_list;}
 dataset * Node::get_file(){return file;}
 dataset * Node::get_data_list(){return data;}
 int * Node::get_map(){return map;}

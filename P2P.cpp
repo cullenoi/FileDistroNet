@@ -13,6 +13,9 @@
 #include "Node/Tracker.h"
 #include "Node/Node.h"
 #include "Node/Routing.h"
+#include "Request.h"
+
+using namespace std;
 
 // Globals...
 ///////////////////////////////////////////////NODE GLOBAL var
@@ -131,11 +134,24 @@ printf("\nPlease Select the following options: >>>\n1.Publish File\n0.Quit\n Or 
         {
         case 1:
             FileDistro(N1.get_file(),N1.get_address(), 
-                    N1.get_node_list(), N1.get_map(), N1.get_edge_list());
+                    N1.get_node_list(), N1.get_map());
             break;
             
         case 2:
-            printf("Requesting FILE NOT YET ADDED\n Please try again.");
+            printf("Enter a file ID to request the file.\n");
+            cout << "Enter 0 to get a list of current known files.\n";
+            int input;
+            cin >> input;
+            if(input){
+                RequestFile(N1.get_address(), input, N1.get_node_list(), N1.get_map(), N1.get_address());
+            } else {
+                while(!input){
+                    N1.printFileList();
+                    printf("Enter a file ID to request the file.\n");
+                    cin >> input;
+                }
+                RequestFile(N1.get_address(), input, N1.get_node_list(), N1.get_map(), N1.get_address());
+            }
             break;
         case 0:
             printf("\nLeaving\n");
@@ -260,8 +276,14 @@ void Recieve(unsigned address, dataset * data_file, int * map)// delete after us
                         // Check if msg is request or receive
                         if(PortParser(buff)){
                             // message is for receiving
+                            int l = 0;
+                        printf("Recieved Package!\n");
+                        if(l = N1.add_file(buff, data_file)!=1)
+                            printf("Error on adding file to NODE Struct\n");
+                        //THis adds the file to a piece of memory like a pointer (NODES.CPP)
                         } else {
                             // message is a request
+                            printf("Received Request!\n");
                             // search the data structure for the file seg
                             /*
                              * if(file_search()){
@@ -272,10 +294,6 @@ void Recieve(unsigned address, dataset * data_file, int * map)// delete after us
                              }
                             */
                         }
-
-                        int l = 0;
-                        printf("Recieved Package!\n");
-                        if(l = N1.add_file(buff, data_file)!=1)printf("Error on adding file to NODE Struct\n");//THis adds the file to a piece of memory like a pointer (NODES.CPP)
                     }
                     else
                     {//CONOR HELP WITH DEFS PLEASE HERE :)
@@ -315,36 +333,36 @@ int ClientCreate(int PORT_server,char *buffer)
     int sock = 0, valread;
     struct sockaddr_in serv_addr;
     char hello[1024] = {0};
-//  memset(&Chints, 0, sizeof Chints);//resets the struct so its not holding any memory.. 
+    //  memset(&Chints, 0, sizeof Chints);//resets the struct so its not holding any memory.. 
     Chints.sin_family = AF_INET;//Sets this to IPV4
     // = SOCK_STREAM;//TCP
     Chints.sin_port = htons(PORT_server);//COnverts to big endian format.. Good practice
     Chints.sin_addr.s_addr = INADDR_ANY;
 
-//create a socket from the info found 
-if( (Csockfd = socket(AF_INET,SOCK_STREAM,0))<0){ //Lets you choose TCP||UDP STREAM||DATAGRAM AI_INET||AI_INET6(Ip_addresse types..)
+    //create a socket from the info found 
+    if( (Csockfd = socket(AF_INET,SOCK_STREAM,0))<0){ //Lets you choose TCP||UDP STREAM||DATAGRAM AI_INET||AI_INET6(Ip_addresse types..)
         fprintf(stderr,"ERROR Client getting socket: %s\n",gai_strerror(Csockfd));
         return 1;//returning one as error check i
-#define PORT "3490"  // the port users will be connecting to
+    #define PORT "3490"  // the port users will be connecting to
 
- if (setsockopt(Csockfd, SOL_SOCKET,SO_REUSEADDR, &force, sizeof(force)))//FORCES THIS SOCKET FileDESC TO THE PORT
+    if (setsockopt(Csockfd, SOL_SOCKET,SO_REUSEADDR, &force, sizeof(force)))//FORCES THIS SOCKET FileDESC TO THE PORT
     {
         perror("setsockopt");
         exit(EXIT_FAILURE);
     }
 
-if (connect(Csockfd, (struct sockaddr *)&Chints,sizeof Chints) == -1) {//connecting
+    if (connect(Csockfd, (struct sockaddr *)&Chints,sizeof Chints) == -1) {//connecting
             close(Csockfd);
             perror("ERROR client: connect");
 			return 1;
-}
-printf("CLIENT FINE\n");
-//TODO: Remove this later just for DEBUGging
-// inet_ntop(Cres->ai_family, get_in_addr((struct sockaddr *)Cres->ai_addr),
-//             s, sizeof s);
+    }   
+    printf("CLIENT FINE\n");
+    //TODO: Remove this later just for DEBUGging
+    // inet_ntop(Cres->ai_family, get_in_addr((struct sockaddr *)Cres->ai_addr),
+    //             s, sizeof s);
     printf("client: connecting to %s\n", s);
 
-unsigned long ha =(MAX);
+    unsigned long ha =(MAX);
 
     	int n;
         char msg[2000] = {0};
@@ -360,11 +378,10 @@ unsigned long ha =(MAX);
 
     send(Csockfd, msg, sizeof(msg), 0); // send to the created socket
     printf("\nMessage sent\n\n\n");
-	
 
 	// close the socket
 	close(Csockfd);
- return 0;   
+    return 0;   
 	
 }
 
