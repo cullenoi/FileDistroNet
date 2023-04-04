@@ -275,11 +275,15 @@ void Recieve(unsigned address, dataset * data_file, node * node_list, edge ** ed
                     //ADD ERROR COND FOR N
                     printf("my_port: %i\n", PORT);
                     printf("%s  = buff\n",buff);
-                    REC_PORT = PortParser(buff);
-
+                    REC_PORT = PortParser(buff);//replace with Node parser....
+                    int FLAGPARSER = FlagParser(buff);//Placeholder add function which seperates fully tbh
 
                     if(REC_PORT == PORT)//Meant to be here 
                     {
+                        if(1==FLAGPARSER){
+                            SendBack(int seg,int port, char* IP ,int fileid );
+                        }
+                        else 
                         int l = 0;
                         printf("Recieved Package!\n");
                         if(l = N1.add_file(buff, data_file)!=1)printf("Error on adding file to NODE Struct\n");//THis adds the file to a piece of memory like a pointer (NODES.CPP)
@@ -310,7 +314,12 @@ void Recieve(unsigned address, dataset * data_file, node * node_list, edge ** ed
 
 //Send back (FILE SEG NUM ,Sendindging port , //IP )
 //find it in nugget make = to char pointer
+SendBack(int seg,int port, char* IP ,int fileid){
+Node to send:||char* msg   nuggetcollector(fileid,seg);
 
+    Node N1 = sharefile(//Fields here...)
+    ClientCreate(IP, msg, PORT  ); 
+}
 //then call client send
 
 
