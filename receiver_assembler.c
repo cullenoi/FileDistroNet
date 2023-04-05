@@ -2,39 +2,8 @@
 #include<stdlib.h>
 #include<string.h>
 
-#define MX_STR_LEN 100
+#include "receiver_assembler.h"
 
-struct file_node{
-int ID;
-int complete;
-int num_data_nodes;
-int end_present;
-int lastID;
-struct data_node * data;
-struct file_node *left;
-struct file_node *right;
-};
-
-struct data_node{
-int ID;
-char * message;
-struct data_node *left;
-struct data_node *right;
-};
-
-void data_insert_order(struct data_node * root);struct data_node *get_data_node(int value,char *word);
-struct data_node * data_insert(struct data_node * root,int ID,char * message,struct file_node * f);
-struct file_node *getNode(int value);
-struct file_node *insert(struct file_node *root, int value);
-void insertorder(struct file_node *root);
-void data_insert_order(struct data_node *root);
-struct file_node * find_node(struct file_node * root, int value);
-struct file_node *parse_message(struct file_node *root,char*dataseg);
-void create_file(struct file_node * root, int value);
-void add_to_file(FILE * f, struct data_node * root);
-char *search_seg(struct file_node * root, int fileID, int segID);
-struct data_node * find_data_node(temp,segID);
-void complete_files(struct file_node * root);
 
 struct data_node *get_data_node(int value,char *word){
 struct data_node *newNode = malloc(sizeof(struct data_node));
@@ -127,16 +96,16 @@ struct file_node *parse_message(struct file_node *root,char*dataseg){
     char* word;
 
     // parse msg
-    char * parse = strtok(dataseg, "|");
+    char * parse = strtok(dataseg, "-");
     // read in file ID
-    parse = strtok(NULL, "|");
-    parse = strtok(NULL, "|");
-    parse = strtok(NULL, "|");
+    parse = strtok(NULL, "-");
+    parse = strtok(NULL, "-");
+    parse = strtok(NULL, "-");
     id = atoi(parse);
     // read in seg ID
-    parse = strtok(NULL, "|");
+    parse = strtok(NULL, "-");
     seg = atoi(parse);
-    parse = strtok(NULL, "|");
+    parse = strtok(NULL, "-");
     end = atoi(parse);
     // read in data
     parse = strtok(NULL, "\0");
@@ -246,6 +215,8 @@ void complete_files(struct file_node * root){
     }
     complete_files(root->right);
 }
+
+int Check_database(int ID, struct file_node * )
 
 int main(){
 struct file_node *root = NULL;

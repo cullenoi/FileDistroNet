@@ -19,19 +19,23 @@ int Req(char * msg){
     return atoi(parse);
 }
 
+//if file node holds (complete file?/file segment?), return 1. else return 0
 int RequestFile(int file_id, node * node_list, int * map, int self){
     // assumptions for sim model...
     // each file consists of 10 segments.
     // 
     int seg = SEG_DFLT;
     int * dest, next;
-
+//TODO ADD CHECK WHAT HAVE THEN DO THIS STUFF //Optional 
     printf("Searching for segs\n");
     int flag = 0;
     char * req;
     // Request each of the segments for the file
     for(int i=0; i<SEG_COUNT; i++){
         // Make a max of three attempts in getting a segment.
+        // if(!Check_database()){...
+        //check database for seg by seg id
+        //return 1 if there, 0 if not
         for(int j=0; j<REDUNDANCY; j++){
             // attempt 1 for request for seg
             dest = rendezvous(file_id, (seg + i), node_list, self);
@@ -61,6 +65,15 @@ int RequestFile(int file_id, node * node_list, int * map, int self){
             return flag;
         }
     }
+    int complete = 0;
+    While(1 != complete ){
+        wait(3);
+        // check if we have all segs
+        
+        if so 
+            Build seg
+                return 1;
+        }
     return flag;
 }
 

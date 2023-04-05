@@ -14,6 +14,7 @@
 #include "Node/Node.h"
 #include "Node/Routing.h"
 #include "Request.h"
+#include "receiver_assembler.h"
 
 using namespace std;
 
@@ -87,6 +88,11 @@ while(1){
 
 
 int main(int argc, char *argv[]){
+//////////////////////ININT ROOT HERE doublw pointer
+
+
+
+
 //////////////////////////////////////////////////////////////////
 //Node Initialisation: place where node PORT is generated and its adress book...
 /////////////////////////////////////////////////////////////////
@@ -147,7 +153,7 @@ int ch;
             int input;
             cin >> input;
             if(input){
-                RequestFile(input, N1.get_node_list(), N1.get_map(), N1.get_address());//I NEED ASSISTANCE
+                RequestFile(input, N1.get_node_list(), N1.get_map(), N1.get_address());//I NEED ASSISTANCE//call root
             } else {
                 N1.printFileList();
             }
@@ -293,7 +299,7 @@ void Recieve(unsigned address, dataset * data_file, node * node_list, edge ** ed
                         // edge ** e_list = X.get_edge_list;
                         // node * n_list = X.get_node_list;
                         printf("INT CHECK == %d\n",NEXT_PORT);
-                        NEXT_PORT = shortest_path(PORT,REC_PORT,edge_list,node_list); //FIND NEXT BEST PLACE TO MOVE ON
+                        NEXT_PORT = shortest_path(PORT,edge_list,node_list); //FIND NEXT BEST PLACE TO MOVE ON
                         printf("INT CHECK == %d\n",NEXT_PORT);
                         ClientCreate(NEXT_PORT,buff);//send it to this address and next port.
                     }//
@@ -312,7 +318,7 @@ void Recieve(unsigned address, dataset * data_file, node * node_list, edge ** ed
 //Send back (FILE SEG NUM ,Sendindging port , //IP )
 //find it in nugget make = to char pointer
 void SendBack(int* segnumber,int port, char* IP ,int fileid,char* msg){
-// Node to send:||char* msg   nuggetcollector(fileid,seg);@
+// char* msg =  nuggetcollector(fileid,seg);
 //ADD FIND THE SEGMENT FUNCTION HERE
  ClientCreate(port, msg  ); 
 }
