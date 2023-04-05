@@ -95,10 +95,6 @@ int main(int argc, char *argv[]){
 		printf("Err in init node (port id: %i)\n", atoi(argv[1]));
 	}
     int file = N1.get_file()->id;
-    node * list = N1.get_node_list();
-    node * curr = list;
-    edge ** e_arr = (N1.get_edge_list());
-    edge * e_head;
     PORT = N1.get_address();//GLOBALLY SETS PORT NUMBER 
     int * map = N1.get_map();
     printf("Server thread start\n");
@@ -147,7 +143,9 @@ int ch;
             int input;
             cin >> input;
             if(input){
-                RequestFile(input, N1.get_node_list(), N1.get_map(), N1.get_address());
+                if(RequestFile(input, N1.get_node_list(), N1.get_map(), N1.get_address())){
+                    printf("Seeking Files\n");
+                } else printf("Error Seeking Files, try another file.\n");
             } else {
                 N1.printFileList();
             }

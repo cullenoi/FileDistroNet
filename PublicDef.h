@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
-#include <string.h>
+//#include <string.h>
 #include <strings.h> // bzero()
 #include <netinet/in.h>
 #include <unistd.h> // read(), write(), close()

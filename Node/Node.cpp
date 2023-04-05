@@ -263,6 +263,7 @@ int Node::add_file(char * dataseg, dataset * data_file){
     //create new data package...
     dataset * new_data = (dataset*)malloc(sizeof(dataset));
     new_data->word = (char*)malloc(MX_STR_LEN * sizeof(char));
+    // add struct to list
     if(data_file){
         // add datagram to the list of data
         new_data->next = data_file;
@@ -273,6 +274,7 @@ int Node::add_file(char * dataseg, dataset * data_file){
     parse = strtok(dataseg, "-");
     printf("Adding file to node %s..", parse);
     // read in file ID
+    parse = strtok(NULL, "-");
     parse = strtok(NULL, "-");
     data_file->id = atoi(parse);
     // read in seg ID
@@ -344,6 +346,7 @@ char * Node::share_file(dataset * file, int seg, int seg_size, int index, int de
         free(point);
         return msg;
     }
+    // special case final seg.
     else{
         for(int j=index; j<index+seg_size; j++){
             buffer = file->word[j];
@@ -354,11 +357,8 @@ char * Node::share_file(dataset * file, int seg, int seg_size, int index, int de
         free(int_char);
         free(point);
         return msg;
-    }
-    
-    }
-    // special case final seg.
-
+    }    
+}
 
 // getters
 

@@ -19,7 +19,7 @@ int Req(char * msg){
     return atoi(parse);
 }
 
-void RequestFile(int file_id, node * node_list, int * map, int self){
+int RequestFile(int file_id, node * node_list, int * map, int self){
     // assumptions for sim model...
     // each file consists of 10 segments.
     // 
@@ -27,27 +27,41 @@ void RequestFile(int file_id, node * node_list, int * map, int self){
     int * dest, next;
 
     printf("Searching for segs\n");
-
+    int flag = 0;
+    char * req;
+    // Request each of the segments for the file
     for(int i=0; i<SEG_COUNT; i++){
-        char * req;
-        // attempt 1 for request for seg
-        dest = rendezvous(file_id, (seg + i), node_list, self);
-        // create request msg...
-        req = ReqAssemble(self, file_id, (seg + i),dest[0]);
-        // if fail: request from dest[1]... dest[2]... return err
-        // handles in seperate function...
-        // send request message...
-        printf("Requesting seg %i from %i\n", (seg + i), dest[0]);
-        // get next hop to relay to...
-        int next_hop, u = dest[0];
-        // track back through the map
-        while(u != self){
-            next_hop = u;
-            u = map[u];
+        // Make a max of three attempts in getting a segment.
+        for(int j=0; j<REDUNDANCY; j++){
+            // attempt 1 for request for seg
+            dest = rendezvous(file_id, (seg + i), node_list, self);
+            // create request msg...
+            req = ReqAssemble(self, file_id, (seg + i), dest[j]);
+            // if fail: request from dest[1]... dest[2]... return err
+            // handles in seperate function...
+            // send request message...
+            printf("Requesting seg %i from %i\n", (seg + i), dest[j]);
+            // get next hop to relay to...
+            int next_hop, u = dest[j];
+            // track back through the map
+            while(u != self){
+                next_hop = u;
+                u = map[u];
+            }
+            int next = next_hop;
+            // 0 indicates success...
+            if(!ClientCreate(next, req)){
+                flag = 1;
+                break;
+            }
         }
-        int next = next_hop;
-        ClientCreate(next, req);
+        // error case
+        if(!flag){
+            printf("Error getting %i/%i. Closing request.\n", file_id, seg);
+            return flag;
+        }
     }
+    return flag;
 }
 
 char * ReqAssemble(int client, int file_id, int seg, int dest){

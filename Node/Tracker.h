@@ -1,8 +1,6 @@
 #ifndef MODULE_TRACKER
 #define MODULE_TRACKER
 
-#include <vector>
-
 #define REDUNDANCY 3
 // simulated package of data.
 typedef struct dataset{

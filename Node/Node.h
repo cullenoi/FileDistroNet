@@ -5,7 +5,6 @@
 #define fList_size 100
 #define MX_STR_LEN 100
 
-#include <string>
 #include "Tracker.h"
 #include "Routing.h"
 
