@@ -4,6 +4,7 @@
 #include "Request.h"
 
 #define REQUEST 0
+#define REQ_ERR 2
 
 #define SEG_DFLT 100
 #define SEG_COUNT 10
@@ -17,6 +18,12 @@ int Req(char * msg){
     printf("%i\n req\n", atoi(parse));
     //printf("PASER SAYS %s.\n", parse);
     return atoi(parse);
+}
+
+char * RequestFail(int dest, int file_id, int seg, int self){
+    char * msg = (char*)malloc(MX_STR_LEN * sizeof(char));
+    // construct sending msg with an ERR value in the flag field
+    
 }
 
 //if file node holds (complete file?/file segment?), return 1. else return 0
@@ -33,51 +40,57 @@ int RequestFile(int file_id, node * node_list, int * map, int self){
     // Request each of the segments for the file
     for(int i=0; i<SEG_COUNT; i++){
         // Make a max of three attempts in getting a segment.
-        // if(!Check_database()){...
-        //check database for seg by seg id
-        //return 1 if there, 0 if not
-        for(int j=0; j<REDUNDANCY; j++){
-            // attempt 1 for request for seg
-            dest = rendezvous(file_id, (seg + i), node_list, self);
-            // create request msg...
-            req = ReqAssemble(self, file_id, (seg + i), dest[j]);
-            // if fail: request from dest[1]... dest[2]... return err
-            // handles in seperate function...
-            // send request message...
-            printf("Requesting seg %i from %i\n", (seg + i), dest[j]);
-            // get next hop to relay to...
-            int next_hop, u = dest[j];
-            // track back through the map
-            while(u != self){
-                next_hop = u;
-                u = map[u];
+        if(!check_database()){
+            //check database for seg by seg id
+            //return 1 if there, 0 if not
+            for(int j=0; j<REDUNDANCY; j++){
+                // attempt 1 for request for seg
+                dest = rendezvous(file_id, (seg + i), node_list, self);
+                // create request msg...
+                req = ReqAssemble(self, REQUEST, file_id, (seg + i), dest[j]);
+                // if fail: request from dest[1]... dest[2]... return err
+                // handles in seperate function...
+                // send request message...
+                printf("Requesting seg %i from %i\n", (seg + i), dest[j]);
+                // get next hop to relay to...
+                int next_hop, u = dest[j];
+                // track back through the map
+                while(u != self){
+                    next_hop = u;
+                    u = map[u];
+                }
+                int next = next_hop;
+                // 0 indicates success...
+                if(!ClientCreate(next, req)){
+                    flag = 1;
+                    break;
+                }
             }
-            int next = next_hop;
-            // 0 indicates success...
-            if(!ClientCreate(next, req)){
-                flag = 1;
-                break;
+            // error case
+            if(!flag){
+                printf("Error getting %i/%i. Closing request.\n", file_id, seg);
+                return flag;
             }
-        }
-        // error case
-        if(!flag){
-            printf("Error getting %i/%i. Closing request.\n", file_id, seg);
-            return flag;
         }
     }
+
     int complete = 0;
-    While(1 != complete ){
+    while(!complete){
         wait(3);
         // check if we have all segs
-        
-        if so 
-            Build seg
-                return 1;
+        int Complete = isComplete(root,file_id);// 
+        if(1 == complete){
+            Printf("File has been recieved\n"); 
+            complete =1;
+        }
+        // if so 
+        //     Build seg
+        //         return 1;
         }
     return flag;
 }
 
-char * ReqAssemble(int client, int file_id, int seg, int dest){
+char * ReqAssemble(int dest, int flag, int file_id, int seg, int self){
     // assemble message
     //char sep = '|';
     char * msg = (char*)malloc(MX_STR_LEN * sizeof(char));
@@ -102,10 +115,11 @@ char * ReqAssemble(int client, int file_id, int seg, int dest){
     strcat(msg, buff);
     strcat(msg, "-");
     // client port
-    sprintf(buff, "%i", client);
+    sprintf(buff, "%i", self);
     strcat(msg, buff);
 
     free(buff);
     // return constructed request
     return msg;
 }
+

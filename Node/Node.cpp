@@ -371,16 +371,16 @@ char * Node::return_file_seg(int dest_port, int file_id, int file_seg){
             // build msg.
             sprintf(buffer, "%i", dest_port);
             strcat(data_seg,buffer);
-            strcat(data_seg, "|");
+            strcat(data_seg, "-");
             sprintf(buffer, "%i", RECEIVE);
             strcat(data_seg, buffer);
-            strcat(data_seg, "|");
+            strcat(data_seg, "-");
             sprintf(buffer, "%i", curr->id);
             strcat(data_seg, buffer);
-            strcat(data_seg, "|");
+            strcat(data_seg, "-");
             sprintf(buffer, "%i", curr->seg);
             strcat(data_seg, buffer);
-            strcat(data_seg, "|");
+            strcat(data_seg, "-");
             strcpy(buffer, curr->word);
             strcat(data_seg, buffer);
             return data_seg;

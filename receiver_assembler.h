@@ -43,8 +43,12 @@ void add_to_file(FILE * f, struct data_node * root);
 
 char *search_seg(struct file_node * root, int fileID, int segID);
 
-struct data_node * find_data_node(temp,segID);
+struct data_node * find_data_node(struct data_node *temp,int segID);
 
 void complete_files(struct file_node * root);
+
+int check_database(struct file_node * root, int fileID, int segID);
+
+int isComplete(struct file_node * root, int fileID);
 
 #endif

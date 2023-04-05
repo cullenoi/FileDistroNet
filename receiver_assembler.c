@@ -216,8 +216,38 @@ void complete_files(struct file_node * root){
     complete_files(root->right);
 }
 
-int Check_database(int ID, struct file_node * )
+int check_database(struct file_node * root, int fileID, int segID){
+    root = find_node(root,fileID);
+    struct data_node * temp = NULL;
+    if(root == NULL){
+        return 0;
+    }
+    else{
+        temp = root->data;
+        temp = find_data_node(temp,segID);
+        if(temp == NULL){
+            return 0;
+        }
+        else{
+            return 1;
+        }
+    }
+    return 0;
+}
 
+int isComplete(struct file_node * root, int fileID){
+    root = find_node(root,fileID);
+    if(root == NULL){
+        return 0;
+    }
+    if(root->complete == 1){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
+/*
 int main(){
 struct file_node *root = NULL;
 
@@ -282,4 +312,4 @@ printf("the number of node is %d and the last id is %d and complete status is %d
 complete_files(root);
 
 return 0;
-}
+}*/

@@ -26,6 +26,8 @@ node * curr;
 edge ** e_arr;
 edge * e_head;
 
+struct file_node *root = NULL;
+
 int sockfd , talkfd ;//SOCKET FILE DESCRIPTOR returns -1 on errno
 struct sockaddr_in hints;
 struct sockaddr_in their_addr;
@@ -100,11 +102,6 @@ int main(int argc, char *argv[]){
 	if(!N1.init_node(argv)){
 		printf("Err in init node (port id: %i)\n", atoi(argv[1]));
 	}
-    int file = N1.get_file()->id;
-    node * list = N1.get_node_list();
-    node * curr = list;
-    edge ** e_arr = (N1.get_edge_list());
-    edge * e_head;
     PORT = N1.get_address();//GLOBALLY SETS PORT NUMBER 
     int * map = N1.get_map();
     printf("Server thread start\n");
@@ -221,7 +218,7 @@ return 0;
 
 
 
-void Recieve(unsigned address, dataset * data_file, node * node_list, edge ** edge_list)// delete after usage..
+void Recieve(unsigned address, dataset * data_file, int * map)// delete after usage..
 {
     
     fd_set active, read;
@@ -262,7 +259,7 @@ void Recieve(unsigned address, dataset * data_file, node * node_list, edge ** ed
                         perror("accept");
                         exit(EXIT_FAILURE);
                     }
-                    printf("accepting message\n");
+                    printf("Accepting message\n\n");
                     FD_SET(client_socket, &active);
                 }
                 else
@@ -283,24 +280,40 @@ void Recieve(unsigned address, dataset * data_file, node * node_list, edge ** ed
 
                     if(N.PORT == PORT)//Meant to be here 
                     {
-                        if(1==N.FLAG){
-                            SendBack( N.SEGNUM, N.PORT,  N.IP , N.FILEID,N.MSG );
+                        if(!N.FLAG){
+                            if(!SendBack( N.SEGNUM, N.PORT, N.IP , N.FILEID)){
+                                // construct fail msg...
+                            }
                         }
-                        else 
+                        else if (N.FLAG == 1){
                         int l = 0;
                         printf("Recieved Package!\n");
-                        if((l = N1.add_file(buff, data_file))!=1)printf("Error on adding file to NODE Struct\n");//THis adds the file to a piece of memory like a pointer (NODES.CPP)
-                    }   //IF FLAG
-                    //CALL SENDBACK(SEG NUMBER)
-                    else
-                    {//CONOR HELP WITH DEFS PLEASE HERE :)
-                    //#FIXME: 
-                        int NEXT_PORT = 0;
-                        // edge ** e_list = X.get_edge_list;
-                        // node * n_list = X.get_node_list;
-                        printf("INT CHECK == %d\n",NEXT_PORT);
-                        NEXT_PORT = shortest_path(PORT,edge_list,node_list); //FIND NEXT BEST PLACE TO MOVE ON
-                        printf("INT CHECK == %d\n",NEXT_PORT);
+                        if(l = N1.add_file(buff, data_file)!=1)
+                                printf("Error on adding file to NODE Struct\n");
+                                
+                                root = parse_message(root,buff);//store data into data storage
+                                if(root == NULL){
+                                    printf("Error on storing data in file node\n");
+                                }
+
+                        //THis adds the file to a piece of memory like a pointer (NODES.CPP)
+                        } else if(N.FLAG == 2){
+                            // Request answered with a failure...
+                            // Create new request msg for next node or quit...
+                            
+                        }    
+                    } else {//CONOR HELP WITH DEFS PLEASE HERE :)
+                        //#FIXME: DONE
+                        int next_hop;
+                        int u = REC_PORT;
+                        while(u != address){
+                            next_hop = u;
+                            u = map[u];
+                        }
+                        int NEXT_PORT = next_hop;
+                        //FIND NEXT BEST PLACE TO MOVE ON
+                        printf("Message for %i: Relay to %d\n",REC_PORT, NEXT_PORT);
+
                         ClientCreate(NEXT_PORT,buff);//send it to this address and next port.
                     }//
                     close(i);
@@ -317,10 +330,15 @@ void Recieve(unsigned address, dataset * data_file, node * node_list, edge ** ed
 
 //Send back (FILE SEG NUM ,Sendindging port , //IP )
 //find it in nugget make = to char pointer
-void SendBack(int* segnumber,int port, char* IP ,int fileid,char* msg){
+void SendBack(int segnumber,int port, char* IP ,int fileid){
 // char* msg =  nuggetcollector(fileid,seg);
 //ADD FIND THE SEGMENT FUNCTION HERE
- ClientCreate(port, msg  ); 
+    if (root == NULL) {
+        printf("ERROR! There is no file.");
+    } else {
+        char *msg = search_seg(root, fileid, segnumber);
+        ClientCreate(port, msg); //add ip
+    }
 }
 
 ////////////Client Functions://///////////////////////////////////////////////////////////////
@@ -440,33 +458,31 @@ NodeInfo PortParser(char* buff){
     strcpy(copy, buff);
     char * parse = (char*)malloc(MX_STR_LEN * sizeof(char));
     int count =0;
-    parse = strtok(copy, ".");
-    while (count <5)
-  {
+    parse = strtok(copy, "-");
+    while (count <5){
 
-    printf ("%s\n",parse);
-    parse = strtok (NULL, ".");
-    if(0 ==count){
-    //Add specific sections lookinto 
-    strcpy(parse,N.IP);
-    }
-    if(1 ==count){
-    N.PORT = atoi(parse);
-    }
-    if(2 ==count){
-    N.FLAG = atoi(parse);
-    }
-    if(3 ==count){
-    N.FILEID = atoi(parse);
-    }
-    if(5 == count){
-        strcpy(buff,N.MSG);
-    }
-    if(4 ==count){
-    N.SEGNUM = atoi(parse);
-    }
-
-    count++;
+        printf ("%s\n",parse);
+        parse = strtok (NULL, "-");
+        if(0 ==count){
+        //Add specific sections lookinto 
+        strcpy(parse,N.IP);
+        }
+        if(1 ==count){
+        N.PORT = atoi(parse);
+        }
+        if(2 ==count){
+        N.FLAG = atoi(parse);
+        }
+        if(3 ==count){
+        N.FILEID = atoi(parse);
+        }
+        if(4 ==count){
+        N.SEGNUM = atoi(parse);
+        }
+        if(5 == count){
+            strcpy(buff,N.MSG);
+        }
+        count++;
   }
   free(copy);
     //FREE PARSE TEST IN TSTING)
