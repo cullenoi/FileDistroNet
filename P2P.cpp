@@ -169,7 +169,6 @@ pthread_mutex_destroy(&mutex);
 // BUILD
 // //
 
-
 // CHECK SEGS
 // GOES THROUGH NUGGET BST AND SEES WHAT SEGS WE ALREADY HAVE 
 // LOOPING FUNCTION WHICH CALLS MESSAGE MAKER (FILE DISTRO) AND THEN CALLS SEND MESSAGE TO Client_h
@@ -275,18 +274,21 @@ void Recieve(unsigned address, dataset * data_file, node * node_list, edge ** ed
                     //ADD ERROR COND FOR N
                     printf("my_port: %i\n", PORT);
                     printf("%s  = buff\n",buff);
-                    REC_PORT = PortParser(buff);//replace with Node parser....
-                    int FLAGPARSER = FlagParser(buff);//Placeholder add function which seperates fully tbh
+                    // REC_PORT = PortParser(buff);//replace with Node parser....
+                    // int FLAGPARSER = FlagParser(buff);//Placeholder add function which seperates fully tbh
+                    // int seg,port,fileid;
+                    // char* IP;
+                    Node N = PortParser(buff);
 
-                    if(REC_PORT == PORT)//Meant to be here 
+                    if(N.get_address == PORT)//Meant to be here 
                     {
-                        if(1==FLAGPARSER){
-                            SendBack(int seg,int port, char* IP ,int fileid );
+                        if(1==N.Flag){
+                            SendBack( seg, port,  IP , fileid );
                         }
                         else 
-                        int l = 0;
+                        int errcode = 0;
                         printf("Recieved Package!\n");
-                        if(l = N1.add_file(buff, data_file)!=1)printf("Error on adding file to NODE Struct\n");//THis adds the file to a piece of memory like a pointer (NODES.CPP)
+                        if((errcode = N1.add_file(buff, data_file))!=1)printf("Error on adding file to NODE Struct\n");//THis adds the file to a piece of memory like a pointer (NODES.CPP)
                     }   //IF FLAG
                     //CALL SENDBACK(SEG NUMBER)
                     else
@@ -364,7 +366,7 @@ if (connect(Csockfd, (struct sockaddr *)&Chints,sizeof Chints) == -1) {//connect
             perror("ERROR client: connect attempting again");
             if(con_counter <3){//do this 3 times to try connect to something
             con_counter++;
-            goto attempt;
+            goto attempt;//No longer needed as we've changed plan but stull good to have
             }
             else 
 			return 1;//Start looping here
@@ -428,7 +430,9 @@ void FileDistro(dataset * file, int address, node * node_list,
         
         printf("Finished assembling segment %i.\n", seg);
         printf("%s\n\n", message);
-        int DEST_PORT = PortParser(message); 
+        // int DEST_PORT = PortParser(message); 
+        Node N = PortParser(message);
+        
         int NEXT = shortest_path(address,DEST_PORT,edge_list,node_list);
         printf("Send seg %i to port %i\n\n", seg, NEXT);
         ClientCreate(NEXT,message);
@@ -436,16 +440,43 @@ void FileDistro(dataset * file, int address, node * node_list,
         seg++;
         free(message); //ADDED TUESDAY
     }
-  
     return;
 }
 
 
-int PortParser(char* buff){
+Node PortParser(char* buff){
+    Node N;
     char * copy = (char*)malloc(MX_STR_LEN * sizeof(char));
     strcpy(copy, buff);
     char * parse = (char*)malloc(MX_STR_LEN * sizeof(char));
+    int count =0;
     parse = strtok(copy, ".");
-    //printf("PASER SAYS %s.\n", parse);
-    return atoi(parse);
+    while (parse != NULL)
+  {
+
+    printf ("%s\n",parse);
+    parse = strtok (NULL, ".");
+    if(0 ==count){
+    //Add specific sections lookinto 
+    }
+    if(1 ==count){
+        
+    }
+    if(2 ==count){
+        
+    }
+    if(3 ==count){
+        
+    }
+    if(4 ==count){
+        
+    }
+    if(5 ==count){
+        
+    }
+
+
+    count++;
+  }
+  return N;
 }

@@ -35,7 +35,8 @@ int PORT;
 void FileDistro(dataset * file, int address, node * node_list,
                 int * map, edge ** edge_list);
 
-int PortParser(char *buff);
+Node PortParser(char *buff);
+int SendBack(int seg,int port, char* IP ,int fileid);
 
 
 
