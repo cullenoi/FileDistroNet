@@ -228,7 +228,8 @@ void Recieve(unsigned address, dataset * data_file, int * map)// delete after us
 
 
         // TODO FIX THIS THINGY
-      while (1){
+      while (1)
+    {
      
         read = active;
 
@@ -266,33 +267,23 @@ void Recieve(unsigned address, dataset * data_file, int * map)// delete after us
                     //ADD ERROR COND FOR N
                     printf("my_port: %i\n", PORT);
                     printf("%s  = buff\n",buff);
-                    REC_PORT = PortParser(buff);
-                    printf("RecPort: %i", REC_PORT);
+                    // REC_PORT = PortParser(buff);//replace with Node parser....
+                    // int FLAGPARSER = FlagParser(buff);//Placeholder add function which seperates fully tbh
+                    // int seg,port,fileid;
+                    // char* IP;
+                    NodeInfo N = PortParser(buff);
 
-                    if(REC_PORT == PORT)//Meant to be here 
-                    {   
-                        printf("Message in: %s ", buff);
-                        // Check if msg is request or receive
-                        if(Req(buff)){
-                            // message is for receiving
-                            int l = 0;
-                            printf("Recieved Package!\n");
+                    if(N.PORT == PORT){
+                        if(!N.FLAG){
+                            SendBack( N.SEGNUM, N.PORT,  N.IP , N.FILEID,N.MSG );
+                        }
+                        else{
+                        int l = 0;
+                        printf("Recieved Package!\n");
                             if(l = N1.add_file(buff, data_file)!=1)
                                 printf("Error on adding file to NODE Struct\n");
                         //THis adds the file to a piece of memory like a pointer (NODES.CPP)
-                        } else {
-                            // message is a request
-                            printf("Received Request!\n");
-                            // search the data structure for the file seg
-                            /*
-                                * if(file_search()){
-                                ClientCreate(client, data);
-                                } else{
-                                construct error case
-                                DEST|2|FileID|PortID|PORT
-                                }
-                            */
-                        }
+                        }       
                     } else {//CONOR HELP WITH DEFS PLEASE HERE :)
                         //#FIXME: DONE
                         int next_hop;
@@ -316,6 +307,14 @@ void Recieve(unsigned address, dataset * data_file, int * map)// delete after us
             break;
     }
     return;
+}
+
+//Send back (FILE SEG NUM ,Sendindging port , //IP )
+//find it in nugget make = to char pointer
+void SendBack(int* segnumber,int port, char* IP ,int fileid,char* msg){
+// Node to send:||char* msg   nuggetcollector(fileid,seg);
+//ADD FIND THE SEGMENT FUNCTION HERE
+ ClientCreate(port, msg  ); 
 }
 
 ////////////Client Functions://///////////////////////////////////////////////////////////////
@@ -429,11 +428,41 @@ void FileDistro(dataset * file, int address, node * node_list, int * map){
     return;
 }
 
-int PortParser(char* buff){
+NodeInfo PortParser(char* buff){
+    NodeInfo N;
     char * copy = (char*)malloc(MX_STR_LEN * sizeof(char));
     strcpy(copy, buff);
     char * parse = (char*)malloc(MX_STR_LEN * sizeof(char));
-    parse = strtok(copy, "-");
-    //printf("PASER SAYS %s.\n", parse);
-    return atoi(parse);
+    int count =0;
+    parse = strtok(copy, ".");
+    while (count <5)
+  {
+
+    printf ("%s\n",parse);
+    parse = strtok (NULL, ".");
+    if(0 ==count){
+    //Add specific sections lookinto 
+    strcpy(parse,N.IP);
+    }
+    if(1 ==count){
+    N.PORT = atoi(parse);
+    }
+    if(2 ==count){
+    N.FLAG = atoi(parse);
+    }
+    if(3 ==count){
+    N.FILEID = atoi(parse);
+    }
+    if(5 == count){
+        strcpy(buff,N.MSG);
+    }
+    if(4 ==count){
+    N.SEGNUM = atoi(parse);
+    }
+
+    count++;
+  }
+  free(copy);
+    //FREE PARSE TEST IN TSTING)
+  return N;
 }
