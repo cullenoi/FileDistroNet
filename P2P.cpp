@@ -428,11 +428,41 @@ void FileDistro(dataset * file, int address, node * node_list, int * map){
     return;
 }
 
-int PortParser(char* buff){
+NodeInfo PortParser(char* buff){
+    NodeInfo N;
     char * copy = (char*)malloc(MX_STR_LEN * sizeof(char));
     strcpy(copy, buff);
     char * parse = (char*)malloc(MX_STR_LEN * sizeof(char));
-    parse = strtok(copy, "-");
-    //printf("PASER SAYS %s.\n", parse);
-    return atoi(parse);
+    int count =0;
+    parse = strtok(copy, ".");
+    while (count <5)
+  {
+
+    printf ("%s\n",parse);
+    parse = strtok (NULL, ".");
+    if(0 ==count){
+    //Add specific sections lookinto 
+    strcpy(parse,N.IP);
+    }
+    if(1 ==count){
+    N.PORT = atoi(parse);
+    }
+    if(2 ==count){
+    N.FLAG = atoi(parse);
+    }
+    if(3 ==count){
+    N.FILEID = atoi(parse);
+    }
+    if(5 == count){
+        strcpy(buff,N.MSG);
+    }
+    if(4 ==count){
+    N.SEGNUM = atoi(parse);
+    }
+
+    count++;
+  }
+  free(copy);
+    //FREE PARSE TEST IN TSTING)
+  return N;
 }
