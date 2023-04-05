@@ -2,17 +2,7 @@
 #include<stdlib.h>
 #include<string.h>
 
-void data_insert_order(struct data_node * root);struct data_node *get_data_node(int value,char *word);
-struct data_node * data_insert(struct data_node * root,int ID,char * message);
-struct file_node *getNode(int value);
-struct file_node *insert(struct file_node *root, int value);
-void insertorder(struct file_node *root);
-void data_insert_order(struct data_node *root);
-struct file_node * find_node(struct file_node * root, int value);
-struct file_node *parse_message(struct file_node *root,char*dataseg);
-void create_file(struct file_node * root, int value);
-void add_to_file(FILE * f, struct data_node * root);
-
+#define MX_STR_LEN 100
 
 struct file_node{
 int ID;
@@ -28,15 +18,29 @@ struct data_node *left;
 struct data_node *right;
 };
 
+void data_insert_order(struct data_node * root);struct data_node *get_data_node(int value,char *word);
+struct data_node * data_insert(struct data_node * root,int ID,char * message);
+struct file_node *getNode(int value);
+struct file_node *insert(struct file_node *root, int value);
+void insertorder(struct file_node *root);
+void data_insert_order(struct data_node *root);
+struct file_node * find_node(struct file_node * root, int value);
+struct file_node *parse_message(struct file_node *root,char*dataseg);
+void create_file(struct file_node * root, int value);
+void add_to_file(FILE * f, struct data_node * root);
+char *search_seg(struct file_node * root, int fileID, int segID);
+struct data_node * find_data_node(temp,segID);
+
 struct data_node *get_data_node(int value,char *word){
 struct data_node *newNode = malloc(sizeof(struct data_node));
 newNode->left = NULL;
 newNode->right = NULL;
 newNode->ID = value;
 int wordlength = strlen(word);
-newNode->message = (char*)malloc(sizeof(wordlength));
-strcpy(newNode->message,word);
-printf("HHHHHHHHHHHHHHEEEEEEEEEERERERER %s\n", newNode->message);
+//char * temp = (char*)malloc((wordlength+1)*sizeof(char));///////////////////////////////////
+char * temp = (char*)malloc((MX_STR_LEN)*sizeof(char));
+ strcpy(temp,word);
+newNode->message = temp;
 return newNode;
 }
 
@@ -88,7 +92,7 @@ if(root == NULL){
 return;
 }
 data_insert_order(root->left);
-printf("%d%s ",root->ID,root->message);
+printf("%d %s ",root->ID,root->message);
 data_insert_order(root->right);
 }
 
@@ -113,33 +117,33 @@ struct file_node *parse_message(struct file_node *root,char*dataseg){
     char* word;
 
     // parse msg
-    char * parse = strtok(dataseg, ".");
-    printf("1. |NEW ENTRY| Adding file to node %s...\n", parse);
+    char * parse = strtok(dataseg, "|");
     // read in file ID
-    parse = strtok(NULL, ".");
+    parse = strtok(NULL, "|");
+    parse = strtok(NULL, "|");
+    parse = strtok(NULL, "|");
     id = atoi(parse);
-    printf("2.Input ID is %d\n",id);
     // read in seg ID
-    parse = strtok(NULL, ".");
+    parse = strtok(NULL, "|");
     seg = atoi(parse);
     // read in data
     parse = strtok(NULL, "\0");
     wordlength = strlen(parse);
-    word = (char*)malloc(sizeof(wordlength));
+    word = (char*)malloc((MX_STR_LEN)*sizeof(char));
     strcpy(word, parse);
 
     //put file node in binary tree
     root = insert(root,id);
-    printf("root is currently %d\n",root->ID);
 
     //find file node to insert seg
     struct file_node * c = root;
     c = find_node(root,id);
-    printf("c is currently %d\n",c->ID);
     
     //inserting seg in file node binary tree
     c->data = data_insert(c->data,seg,word);
-    printf("the message in c->data is %s\n",c->data->message);
+    //
+    //printf("the message in c->data is %s\n",c->data->message);
+    ///
     return root;
 }
 
@@ -150,10 +154,14 @@ void create_file(struct file_node * root, int value){
         printf("This file does not exist\n");
     }
     else if(root->ID == value){
-        printf("here is %d\n",root->ID);
         FILE * fp;
-        fp = fopen("file_test.txt","w+");
-        fputs("This is a new file\n",fp);
+        char id[MX_STR_LEN];
+        sprintf(id,"%d",value);
+        strcat(id,".txt");
+        fp = fopen(id,"w+");
+        fputs("COMPLETED FILE: ",fp);
+        fputs(id,fp);
+        fputs("\n",fp);
         add_to_file(fp,root->data);
         fclose(fp);
 
@@ -171,47 +179,101 @@ void add_to_file(FILE * f, struct data_node * root){
         return;
     }
     add_to_file(f,root->left);
-    //while(root->message){
         fputs(root->message,f);
-    //}
     add_to_file(f,root->right);
+}
+
+struct data_node * find_data_node(struct data_node * root,int value){
+    if(root == NULL){
+        return NULL;
+    }
+    else if (root->ID == value){
+        return root;
+    }
+    else if(root->ID > value){
+        return find_data_node(root->left,value);
+    }
+    else if(root->ID < value){
+        return find_data_node(root->right,value);
+    }
+    return NULL;
+}
+
+char *search_seg(struct file_node * root, int fileID, int segID){
+    root = find_node(root,fileID);
+    struct data_node * temp = NULL;
+    if(root == NULL){
+        return NULL;
+    }
+    else{
+        temp = root->data;
+        temp = find_data_node(temp,segID);
+        if(temp == NULL){
+            return NULL;
+        }
+        else{
+            return temp->message;
+        }
+    }
+    return NULL;
 }
 
 int main(){
 struct file_node *root = NULL;
 
-/*root = parse_message(root,"1111.13.100.bleh");
-root = parse_message(root,"1111.15.101.bleh");
-//root = parse_message(root,"1111.2222.102.bleh");
-//root = parse_message(root,"1111.2222.103.bleh");
-root = parse_message(root,"1111.2224.104.bleh");
-root = parse_message(root,"1111.13.105.bleh");
-//root = parse_message(root,"1111.2222.106.bleh");
-root = parse_message(root,"1111.1012.107.bleh");*/
+root = parse_message(root,"198.10.12.145|0|1111|13|100|hjksdlhgvshgrsvhnkcshdgvhniskrdgc\n");
+root = parse_message(root,"198.10.12.145|0|1111|15|109|babbabbbabababadbflasdjfbsaf\n");
+root = parse_message(root,"198.10.12.145|0|1111|13|105|shingodingobingo\n");
+root = parse_message(root,"198.10.12.145|0|1111|15|103|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n");
+root = parse_message(root,"198.10.12.145|0|1111|222|107|1234567891011121314151617181920212223242526272829303132333435363738\n");
+root = parse_message(root,"198.10.12.145|0|1111|13|108|1234567891011121314151617181920212223242526272829303132333435363738\n");
+root = parse_message(root,"198.10.12.145|0|1111|15|102|1234567891011121314151617181920212223242526272829303132333435363738\n");
+root = parse_message(root,"198.10.12.145|0|1111|13|101|1234567891011121314151617181920212223242526272829303132333435363738\n");
+root = parse_message(root,"198.10.12.145|0|1111|15|100|1234567891011121314151617181920212223242526272829303132333435363738\n");
 
-root = parse_message(root,"1111.2222.100.123456789101112 ");
-root = parse_message(root,"1111.2222.101.123456 ");
-root = parse_message(root,"1111.2222.102.123456 ");
-root = parse_message(root,"1111.2222.103.d ");
-root = parse_message(root,"1111.2222.104.eez ");
-root = parse_message(root,"1111.2222.105.fnut ");
-root = parse_message(root,"1111.2222.106.zzzzzz ");
+root = parse_message(root,"198.10.12.145|0|1111|2222|109|1234567891011121314151617181920212223242526272829303132333435363738\n");
+root = parse_message(root,"198.10.12.145|0|1111|2222|108|1234567891011121314151617181920212223242526272829303132333435363738\n");
+root = parse_message(root,"198.10.12.145|0|1111|2222|107|1234567891011121314151617181920212223242526272829303132333435363738\n");
+root = parse_message(root,"198.10.12.145|0|1111|2222|106|1234567891011121314151617181920212223242526272829303132333435363738\n");
+root = parse_message(root,"198.10.12.145|0|1111|2222|105|1234567891011121314151617181920212223242526272829303132333435363738\n");
+root = parse_message(root,"198.10.12.145|0|1111|2222|104|1234567891011121314151617181920212223242526272829303132333435363738\n");
+root = parse_message(root,"198.10.12.145|0|1111|2222|103|1234567891011121314151617181920212223242526272829303132333435363738\n");
+root = parse_message(root,"198.10.12.145|0|1111|2222|102|1234567891011121314151617181920212223242526272829303132333435363738\n");
+root = parse_message(root,"198.10.12.145|0|1111|2222|101|1234567891011121314151617181920212223242526272829303132333435363738\n");
+root = parse_message(root,"198.10.12.145|0|1111|2222|100|1234567891011121314151617181920212223242526272829303132333435363738\n");
 
-/*root = parse_message(root,"1111.2222.100.a");
-root = parse_message(root,"1111.2222.101.b");
-root = parse_message(root,"1111.2222.102.c");
-root = parse_message(root,"1111.2222.103.d");
-root = parse_message(root,"1111.2222.104.e");
-root = parse_message(root,"1111.2222.105.f");
-root = parse_message(root,"1111.2222.106.g");*/
+
+//TODO:
+//EXPAND DATAGRAM AND SWITCH TO |||||||||||||||||
+//MAKE FUNCTION THAT SEARCHES FOR EXACT DATASEG AND RETURNS IT AS A CHAR *
+//FUNCTION CHECKS IF FILE IS COMPLETE
+//ip|port|send/recieve|fileid|segid|message
+//
+//function to check if all nuggets are here
+//create request create dest port, 
+//change parser to , instead of .
+//while loop check if file is all neggets theres, then build it
+//datagram has flag saying send or recieve ->bool
+//datagram has eof yes/no bool in it
+//cool to have ->list files comleted and half completed and stored
 
 insertorder(root);
-//root = root->right;
-//root = root->right;
 printf("\n");
 data_insert_order(root->data);
 
 create_file(root,2222);
+create_file(root,13);
+create_file(root,15);
+create_file(root,222);
+
+char * temp = search_seg(root,13,100);
+printf("char returned is %s\n",temp);
+temp = search_seg(root,12,100);
+printf("char returned is %s\n",temp);
+temp = search_seg(root,15,103);
+printf("char returned is %s\n",temp);
+temp = search_seg(root,2222,100);
+printf("char returned is %s\n",temp);
 
 return 0;
 }
