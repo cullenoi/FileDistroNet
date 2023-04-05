@@ -35,7 +35,9 @@ int ClientCreate(int PORT_server,char *buffer);
 
 void FileDistro(dataset * file, int address, node * node_list, int * map);
 
-int PortParser(char *buff);
+NodeInfo PortParser(char *buff);
+void SendBack(int NUM,int port, char* IP ,int fileid,char* msg);
+
 
 
 
