@@ -40,7 +40,8 @@ int Node::init_node(char * argv[]){
         return 0;
     }
     printf("Loading nodes.. \n");
-    address_book = load_nodes(argv[3]);
+    address_book = NULL;
+    load_nodes(argv[3]);
     printf("Loading edges...\n");
     edge_list = load_edges(argv[4]);
     printf("Loading list of files...\n");
@@ -92,24 +93,24 @@ int Node::load_node_info(char *fname){
     return 1;
 }        
 
-node * Node::load_nodes (char *fname){
+void Node::load_nodes (char *fname){
     // init
     FILE * csv = fopen(fname, "r");
     char row[MX_STR_LEN];
     node * N = (node*)malloc(sizeof(node));
     node * temp, * head = N;
-    head->next = NULL;
+    head = NULL;
     // go though the file and add all nodes to the list.
     while(!feof(csv)){
         fgets(row, MX_STR_LEN, csv);
         node * N = (node*)malloc(sizeof(node));
+        if(address_book){
+            N->next = address_book;
+        }
+        address_book = N;
         N->id = atoi(row);
-        temp = head;
-        N->next = head;
-        head = N;
     }
     printf("Loaded nodes\n");
-    return head;
 }
 
 edge ** Node::load_edges (char *fname){
@@ -134,19 +135,19 @@ edge ** Node::load_edges (char *fname){
             switch (i) {
             case 0: // V1
                 // from D1 to D2..
-                adj_head = EdgeList[atoi(token)];
+                adj_head = EdgeList[(atoi(token) - IPSTART)];
                 D1->id = atoi(token);
                 if(adj_head)
                     D2->e_next = adj_head;
-                EdgeList[atoi(token)] = D2;
+                EdgeList[(atoi(token) - IPSTART)] = D2;
                 break;
             case 1: // V2
                 // from D2 to D1
                 D2->id = atoi(token);
-                adj_head = EdgeList[atoi(token)];
+                adj_head = EdgeList[(atoi(token) - IPSTART)];
                 if(adj_head)
                     D1->e_next = adj_head;
-                EdgeList[atoi(token)] = D1;
+                EdgeList[(atoi(token) - IPSTART)] = D1;
                 break;
             case 2: //weight
                 D1->weight = atoi(token);
@@ -333,7 +334,16 @@ char * Node::share_file(dataset * file, int seg, int seg_size, int index, int de
     //char * buffer = (char*)malloc(seg_size * sizeof(char));
     char buffer;
     char end = '\0';
+
+    //sends 1 for final segment, 0 for every other segment
+    if(seg == 109){
+        strcat(msg,"1-");
+    }
+    else{
+        strcat(msg,"0-");
+    }
     //printf("%s\n", msg);
+    // special case final seg.
     if(seg == 109){
         int i = 0;
         for(int j=index; j<file->char_count; j++){
@@ -346,7 +356,6 @@ char * Node::share_file(dataset * file, int seg, int seg_size, int index, int de
         free(point);
         return msg;
     }
-    // special case final seg.
     else{
         for(int j=index; j<index+seg_size; j++){
             buffer = file->word[j];
@@ -410,6 +419,12 @@ int * Node::get_file_list(){return file_list;}
 dataset * Node::get_file(){return file;}
 dataset * Node::get_data_list(){return data;}
 int * Node::get_map(){return map;}
+
+
+
+    
+
+
 
 /*
 int main(int argc, char *argv[]){

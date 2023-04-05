@@ -17,6 +17,7 @@
 
 #include "Node/Node.h"
 #include "Node/Tracker.h"
+#include "receiver_assembler.h"
 
 
 
@@ -37,14 +38,15 @@ char* MSG;
 int FLAG;
 int FILEID;
 int SEGNUM;
-
 }NodeInfo;
-int ClientCreate(int PORT_server,char *buffer);
+
+int ClientCreate(char* IP,int PORT_server,char *buffer);
 
 void FileDistro(dataset * file, int address, node * node_list, int * map);
 
 NodeInfo PortParser(char *buff);
-void SendBack(int NUM,int port, char* IP ,int fileid);
+
+int SendBack(int NUM,int port, char* IP ,int fileid, char * msg);
 
 
 

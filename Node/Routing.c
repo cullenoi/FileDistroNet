@@ -6,6 +6,7 @@
 #include "Tracker.h"
 #include "Node.h"
 
+#define PORT_OFFSET 30000
 #define nList_size 5000
 #define stringLength 50
 
@@ -16,7 +17,7 @@ node * N_List[nList_size];
 void create_N_List(node * n_list){
     node * curr = n_list;
     while(curr){
-        N_List[curr->id] = curr;
+        N_List[(curr->id - PORT_OFFSET)] = curr;
         curr = curr->next;
     }
 }
@@ -54,7 +55,7 @@ void priority_q(Queue * q, node * v, int * dist){
         q->head = v;
     else{
         // find edge position in weighted priority queue
-        while(dist[curr->id] > dist[v->id] || curr != NULL){
+        while(dist[((curr->id) - PORT_OFFSET)] > dist[((v->id) - PORT_OFFSET)] || curr != NULL){
             prev = curr;
             curr = curr->q_next;
         }
@@ -107,7 +108,7 @@ int search_Edges(int u, int v, edge ** e_list){
     //return weight if edge exists..
     edge * curr = *(e_list + u);
     while(curr){
-        if(curr->id == v){
+        if((curr->id - PORT_OFFSET) == v){
             return curr->weight;
         }
         curr = curr->e_next;
@@ -141,7 +142,7 @@ int * shortest_path(int startNode, edge ** e_list, node * n_list){
         dist[i] = __INT_MAX__; //set as 'unexplored'
         prev[i] = NULL;
     }
-    dist[startNode] = 0;
+    dist[startNode - PORT_OFFSET] = 0;
     int u;
 
     for (int i=0; i<nList_size; i++){
@@ -154,7 +155,7 @@ int * shortest_path(int startNode, edge ** e_list, node * n_list){
                     && dist[u] != __INT_MAX__  
                     && dist[u] + search_Edges(u,v,e_list) < dist[v]){
                     dist[v] = dist[u] + search_Edges(u,v,e_list);
-                    map[v] = u;
+                    map[v] = (u + PORT_OFFSET);
                 }
             }
         }
@@ -183,7 +184,7 @@ int * shortest_path(int startNode, edge ** e_list, node * n_list){
     // return map array...
     free_memory();
     return map;
-    
+   
     // stack for printing..
     // q->head = N_List[u];
     // N_List[u]->q_next = NULL;
@@ -216,3 +217,19 @@ void free_memory ( void ) {
     //     // }
     // }
 }
+
+int next_hop(int dest, int self, int * map){
+    int count = 0;
+    int next_hop;
+    int u = dest;
+    while(u != self){
+        count++;
+        if(count > 100) break;
+        printf(" -> %i\n", u);
+        next_hop = u;
+        u = map[(u - PORT_OFFSET)];
+    }
+    return next_hop;
+}
+
+

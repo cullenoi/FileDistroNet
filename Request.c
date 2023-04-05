@@ -2,6 +2,7 @@
 #include "Node/Tracker.h"
 #include "Node/Node.h"
 #include "Request.h"
+#include "receiver_assembler.h"
 
 #define REQUEST 0
 #define REQ_ERR 2
@@ -23,11 +24,13 @@ int Req(char * msg){
 char * RequestFail(int dest, int file_id, int seg, int self){
     char * msg = (char*)malloc(MX_STR_LEN * sizeof(char));
     // construct sending msg with an ERR value in the flag field
-    
+    msg = ReqAssemble(dest, REQ_ERR, file_id, seg, self);
+    return msg;
 }
 
 //if file node holds (complete file?/file segment?), return 1. else return 0
-int RequestFile(int file_id, node * node_list, int * map, int self){
+int RequestFile(struct file_node * root, int file_id,
+                node * node_list, int * map, int self, char ** IP_index){
     // assumptions for sim model...
     // each file consists of 10 segments.
     // 
@@ -40,7 +43,7 @@ int RequestFile(int file_id, node * node_list, int * map, int self){
     // Request each of the segments for the file
     for(int i=0; i<SEG_COUNT; i++){
         // Make a max of three attempts in getting a segment.
-        if(!check_database()){
+        if(!check_database(root, file_id, seg)){//check to see if message is in db 1 ==true 0 not
             //check database for seg by seg id
             //return 1 if there, 0 if not
             for(int j=0; j<REDUNDANCY; j++){
@@ -60,8 +63,9 @@ int RequestFile(int file_id, node * node_list, int * map, int self){
                     u = map[u];
                 }
                 int next = next_hop;
+                char* IP = IP_index[next - IPSTART];
                 // 0 indicates success...
-                if(!ClientCreate(next, req)){
+                if(!ClientCreate(IP,next, req)){
                     flag = 1;
                     break;
                 }
@@ -76,11 +80,11 @@ int RequestFile(int file_id, node * node_list, int * map, int self){
 
     int complete = 0;
     while(!complete){
-        wait(3);
+        sleep(3);
         // check if we have all segs
         int Complete = isComplete(root,file_id);// 
         if(1 == complete){
-            Printf("File has been recieved\n"); 
+            printf("File has been recieved\n"); 
             complete =1;
         }
         // if so 

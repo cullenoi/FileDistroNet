@@ -16,15 +16,18 @@
 #include "Request.h"
 #include "receiver_assembler.h"
 
+
 using namespace std;
+
+char * IP_index[nList_size] = {NULL};
 
 // Globals...
 ///////////////////////////////////////////////NODE GLOBAL var
 Node N1;
-node * list ;
-node * curr;
-edge ** e_arr;
-edge * e_head;
+// node * list ;
+// node * curr;
+// edge ** e_arr;
+// edge * e_head;
 
 struct file_node *root = NULL;
 
@@ -91,12 +94,9 @@ while(1){
 
 int main(int argc, char *argv[]){
 //////////////////////ININT ROOT HERE doublw pointer
-
-
-
-
+    
 //////////////////////////////////////////////////////////////////
-//Node Initialisation: place where node PORT is generated and its adress book...
+//Node Initialisation: place where node PORT is generated and its address book...
 /////////////////////////////////////////////////////////////////
     Node N1;
 	if(!N1.init_node(argv)){
@@ -105,9 +105,22 @@ int main(int argc, char *argv[]){
     PORT = N1.get_address();//GLOBALLY SETS PORT NUMBER 
     int * map = N1.get_map();
     printf("Server thread start\n");
+
+    node * curr = N1.get_node_list();
+    while(curr){
+        // FOR NOW: odd/even select on nodes
+        char * IP_addr = (char*)malloc(MX_STR_LEN * sizeof(char));
+        if(curr->id % 2 == 0){
+            strcpy(IP_addr, RP1);
+        } else strcpy(IP_addr, RP2);
+        printf("-> %i\n", curr->id);
+        IP_index[(curr->id - IPSTART)] = IP_addr;
+        curr = curr->next;
+    }
 ///////////////////////////////////////////////////////////////// 
 //Server Section:
 //////////////////////////////////////////////////////////////////
+printf("Survived Conor Bowler\n");
 pthread_mutex_init(&mutex,NULL);
 argy A ;    //= (argy*)malloc(sizeof(argy));
 
@@ -150,7 +163,8 @@ int ch;
             int input;
             cin >> input;
             if(input){
-                RequestFile(input, N1.get_node_list(), N1.get_map(), N1.get_address());//I NEED ASSISTANCE//call root
+                RequestFile(root, input, N1.get_node_list(), 
+                            N1.get_map(), N1.get_address(), IP_index);//I NEED ASSISTANCE//call root
             } else {
                 N1.printFileList();
             }
@@ -281,17 +295,24 @@ void Recieve(unsigned address, dataset * data_file, int * map)// delete after us
                     if(N.PORT == PORT)//Meant to be here 
                     {
                         if(!N.FLAG){
-                            if(!SendBack( N.SEGNUM, N.PORT, N.IP , N.FILEID)){
+                            char * retReq;
+                            if(!SendBack(N.SEGNUM, N.PORT, N.IP, N.FILEID, retReq)){
                                 // construct fail msg...
+                                retReq = RequestFail(N.PORT, N.FILEID, N.SEGNUM, PORT);   
                             }
+                            // Send answer to request
+                            // Either being successful -> SendBack | or Failure RequestFail.
+                            int next = next_hop(N.PORT, PORT, map);
+                            ClientCreate(N.IP, next, retReq);
                         }
                         else if (N.FLAG == 1){
-                        int l = 0;
                         printf("Recieved Package!\n");
-                        if(l = N1.add_file(buff, data_file)!=1)
-                                printf("Error on adding file to NODE Struct\n");
+                        ///
+                        if(!N1.add_file(buff, data_file)){
+                            printf("Error on adding file to NODE Struct\n");
+                        }
                                 
-                                root = parse_message(root,buff);//store data into data storage
+                                root = parse_message(root,buff);//store data into data storage *must let equal root*
                                 if(root == NULL){
                                     printf("Error on storing data in file node\n");
                                 }
@@ -304,17 +325,14 @@ void Recieve(unsigned address, dataset * data_file, int * map)// delete after us
                         }    
                     } else {//CONOR HELP WITH DEFS PLEASE HERE :)
                         //#FIXME: DONE
-                        int next_hop;
-                        int u = REC_PORT;
-                        while(u != address){
-                            next_hop = u;
-                            u = map[u];
-                        }
-                        int NEXT_PORT = next_hop;
+                        int NEXT_PORT = next_hop(N.PORT, PORT, map);
                         //FIND NEXT BEST PLACE TO MOVE ON
-                        printf("Message for %i: Relay to %d\n",REC_PORT, NEXT_PORT);
+                        //IPLOOKPU HERE TOO
+                        int index = NEXT_PORT ;//all calculated through routing table
+                        char* IP = IP_index[index];
+                        printf("Message for %i: Relay to %d\n",N.PORT, NEXT_PORT);
 
-                        ClientCreate(NEXT_PORT,buff);//send it to this address and next port.
+                        ClientCreate(IP,NEXT_PORT,buff);//send it to this address and next port.
                     }//
                     close(i);
                     FD_CLR(i, &active);
@@ -330,23 +348,30 @@ void Recieve(unsigned address, dataset * data_file, int * map)// delete after us
 
 //Send back (FILE SEG NUM ,Sendindging port , //IP )
 //find it in nugget make = to char pointer
-void SendBack(int segnumber,int port, char* IP ,int fileid){
+int SendBack(int segnumber,int port, char* IP ,int fileid, char * msg){
 // char* msg =  nuggetcollector(fileid,seg);
 //ADD FIND THE SEGMENT FUNCTION HERE
-    if (root == NULL) {
+    if (root == NULL) {//no files available
         printf("ERROR! There is no file.");
+        return 0;
     } else {
-        char *msg = search_seg(root, fileid, segnumber);
-        ClientCreate(port, msg); //add ip
+        msg = search_seg(root, fileid, segnumber);//search for file segment by ID, return message
+        if(msg == NULL){//specific file segment not available
+            return 0;
+        }
+        else{
+            ClientCreate(IP,port, msg);
+            return 1;
+        }
     }
 }
 
 ////////////Client Functions://///////////////////////////////////////////////////////////////
 
-int ClientCreate(int PORT_server,char *buffer)
+int ClientCreate(char* IP,int PORT_server,char *buffer)
 {
     printf("In CLIENT\n");
-
+    PORT_server = PORT_server + IPSTART;
     int Csockfd =99;//SOCKET FILE DESCRIPTOR returns -1 on errno
     struct sockaddr_in Chints;// was using the addrinfo but doesnt work for single networking..
     char s[INET6_ADDRSTRLEN];//have it as length ipv6 incase good practise
@@ -358,15 +383,39 @@ int ClientCreate(int PORT_server,char *buffer)
     char hello[1024] = {0};
     //  memset(&Chints, 0, sizeof Chints);//resets the struct so its not holding any memory.. 
     Chints.sin_family = AF_INET;//Sets this to IPV4
-    // = SOCK_STREAM;//TCP
     Chints.sin_port = htons(PORT_server);//COnverts to big endian format.. Good practice
+    // = SOCK_STREAM;//TCP
+    ///IRL MODE(UNCOMMENT FOR REAL TESTS)
+    // Chints.sin_addr.s_addr = inet_addr(IP);//Change here - inaddr_any 
+    // memset(Chints.sin_zero, '\0', sizeof Chints.sin_zero); //OLD APPROACH
+ 
+    //////////SIM Mode....
     Chints.sin_addr.s_addr = INADDR_ANY;
+
 
     //create a socket from the info found 
     if( (Csockfd = socket(AF_INET,SOCK_STREAM,0))<0){ //Lets you choose TCP||UDP STREAM||DATAGRAM AI_INET||AI_INET6(Ip_addresse types..)
         fprintf(stderr,"ERROR Client getting socket: %s\n",gai_strerror(Csockfd));
         return 1;//returning one as error check i
     }
+
+///////////////////IRL MODE UNCOMMENT FOR PIS/////////////////////////
+
+
+//Try bind instead of connect
+// bind(Csockfd, (struct sockaddr *)&Chints, sizeof Chints);
+// int force =1;
+//  if (setsockopt(Csockfd, SOL_SOCKET,SO_REUSEADDR, &force, sizeof(force)))//FORCES THIS SOCKET FD TO THE PORT
+//     {
+//         perror("setsockopt");
+//         exit(EXIT_FAILURE);
+//     }
+
+
+
+///////////////////////////////////////////
+
+    //////////SIM MODE///////-------------------
     int force = 1;
 
     if (setsockopt(Csockfd, SOL_SOCKET,SO_REUSEADDR, &force, sizeof(force)))//FORCES THIS SOCKET FileDESC TO THE PORT
@@ -375,6 +424,9 @@ int ClientCreate(int PORT_server,char *buffer)
         exit(EXIT_FAILURE);
     }
 
+
+
+//////////////////////////////////////////////////////////
     if (connect(Csockfd, (struct sockaddr *)&Chints,sizeof Chints) == -1) {//connecting
             close(Csockfd);
             perror("ERROR client: connect");
@@ -436,15 +488,17 @@ void FileDistro(dataset * file, int address, node * node_list, int * map){
             printf("%s\n\n", message);
             //int DEST_PORT = PortParser(message); 
             // get the next hop;
-            int next_hop;
-            int u = dest_port[i];
-            while(u != address){
-                next_hop = u;
-                u = map[u];
-            }
-            int NEXT = next_hop;
+            printf("| \n");
+            int NEXT = next_hop(dest_port[i], address, map);
+            printf("| \n");
+            // func -> find IP
+            //IP LOOKUP TODO
+            printf("Next = %d",NEXT);
+            int index = NEXT + IPSTART;
+            char* IP = IP_index[index];
             printf("Send seg %i to port %i\n\n", seg, NEXT);
-            ClientCreate(NEXT,message);
+            ClientCreate(IP,NEXT,message);
+            free(message);
         }
         index = index + seg_size;
         seg++;
@@ -453,6 +507,7 @@ void FileDistro(dataset * file, int address, node * node_list, int * map){
 }
 
 NodeInfo PortParser(char* buff){
+    printf("Getting Port Info\n");
     NodeInfo N;
     char * copy = (char*)malloc(MX_STR_LEN * sizeof(char));
     strcpy(copy, buff);
@@ -478,6 +533,7 @@ NodeInfo PortParser(char* buff){
         }
         if(4 ==count){
         N.SEGNUM = atoi(parse);
+            printf("Problem here");
         }
         if(5 == count){
             strcpy(buff,N.MSG);
@@ -485,6 +541,7 @@ NodeInfo PortParser(char* buff){
         count++;
   }
   free(copy);
+  free(parse);//This might cause problems
     //FREE PARSE TEST IN TSTING)
   return N;
 }
