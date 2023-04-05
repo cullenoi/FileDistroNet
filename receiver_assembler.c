@@ -6,7 +6,7 @@
 
 
 struct data_node *get_data_node(int value,char *word){
-struct data_node *newNode = malloc(sizeof(struct data_node));
+struct data_node *newNode = (struct data_node*)malloc(sizeof(struct data_node));
 newNode->left = NULL;
 newNode->right = NULL;
 newNode->ID = value;
@@ -32,7 +32,7 @@ return root;
 }
 
 struct file_node *getNode(int value){
-struct file_node *newNode = malloc(sizeof(struct file_node));
+struct file_node *newNode = (struct file_node*)malloc(sizeof(struct file_node));
 newNode->left = NULL;
 newNode->right = NULL;
 newNode->data = NULL;
@@ -274,18 +274,7 @@ root = parse_message(root,"198.10.12.145|0|1111|2222|100|0|123456789101112131415
 
 
 //TODO:
-//EXPAND DATAGRAM AND SWITCH TO |||||||||||||||||
-//MAKE FUNCTION THAT SEARCHES FOR EXACT DATASEG AND RETURNS IT AS A CHAR *
-//FUNCTION CHECKS IF FILE IS COMPLETE
-//ip|port|send/recieve|fileid|segid|message
-//
-//function to check if all nuggets are here
-//create request create dest port, 
-//change parser to , instead of .
-//while loop check if file is all neggets theres, then build it
-//datagram has flag saying send or recieve ->bool
-//datagram has eof yes/no bool in it
-//cool to have ->list files comleted and half completed and stored
+//no longer including end of file
 
 insertorder(root);
 printf("\n");

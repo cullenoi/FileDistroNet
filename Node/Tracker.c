@@ -90,7 +90,7 @@ int * rendezvous(int file_key, int file_seg, node * head, int self){
     int best_hash[REDUNDANCY] = {0,0,0};
     int hash_val;
     node * curr = head;
-    while(curr->next->id != 0){
+    while(curr){
         if(curr->id != self){
             hash_val = hash(file_key, file_seg, curr->id);
             if(hash_val > best_hash[0]){
@@ -133,7 +133,7 @@ int * rendezvous(int file_key, int file_seg, node * head, int self){
 int hash(int key, int seg, int node){
 
     long long unsigned mul = 1;
-    mul = mul * node * 17 * seg;
+    mul = mul * (node - 30000) * 17 * seg;
     mul = mul % 1432;
     mul = mul * key % 191;
     mul = mul * 54 * seg;

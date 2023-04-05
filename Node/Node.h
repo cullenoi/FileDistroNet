@@ -4,7 +4,9 @@
 #define nList_size 5000
 #define fList_size 100
 #define MX_STR_LEN 100
-
+#define  RP1 "10.35.70.10"
+#define  RP2 "10.35.70.30"
+#define IPSTART 30000
 #include "Tracker.h"
 #include "Routing.h"
 
@@ -18,12 +20,15 @@ class Node {
         dataset * data;
         dataset * file;
         int file_list[fList_size];
+        
         int * map;
         //book_date: yy/mm/dd/hh/mm/ss/..
         unsigned book_date;
     public:
         //constructs node
         Node(){
+
+            
 
             address = 0;
 
@@ -54,7 +59,7 @@ class Node {
         // load nod info intoc correct attributes
         int load_node_info (char *fname);
         //loads the vertices from the CSV file of name fname
-        node * load_nodes (char *fname); 
+        void load_nodes (char *fname); 
         //loads the edges from the CSV file of name fname
         edge ** load_edges (char *fname);
         // loads list of available files
