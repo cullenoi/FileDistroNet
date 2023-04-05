@@ -29,14 +29,24 @@
 #define MAX 100
 #define SA struct sockaddr
 /////////server side//
+typedef struct NodeInfo{
+
+int PORT;
+char* IP;
+char* MSG;
+int FLAG;
+int FILEID;
+int SEGNUM;
+
+}NodeInfo;
 
 /// @brief CLIENT SIDE///// These could be made simply as called in function noneeed fr global
 int PORT;
 void FileDistro(dataset * file, int address, node * node_list,
                 int * map, edge ** edge_list);
 
-Node PortParser(char *buff);
-int SendBack(int seg,int port, char* IP ,int fileid);
+NodeInfo PortParser(char *buff);
+void SendBack(int NUM,int port, char* IP ,int fileid,char* msg);
 
 
 

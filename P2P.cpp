@@ -25,6 +25,7 @@ edge ** e_arr;
 edge * e_head;
 
 
+
 typedef struct argy {
     int portptr;
     dataset * data_file;
@@ -278,17 +279,17 @@ void Recieve(unsigned address, dataset * data_file, node * node_list, edge ** ed
                     // int FLAGPARSER = FlagParser(buff);//Placeholder add function which seperates fully tbh
                     // int seg,port,fileid;
                     // char* IP;
-                    Node N = PortParser(buff);
+                    NodeInfo N = PortParser(buff);
 
-                    if(N.get_address == PORT)//Meant to be here 
+                    if(N.PORT == PORT)//Meant to be here 
                     {
-                        if(1==N.Flag){
-                            SendBack( seg, port,  IP , fileid );
+                        if(1==N.FLAG){
+                            SendBack( N.SEGNUM, N.PORT,  N.IP , N.FILEID,N.MSG );
                         }
                         else 
-                        int errcode = 0;
+                        int l = 0;
                         printf("Recieved Package!\n");
-                        if((errcode = N1.add_file(buff, data_file))!=1)printf("Error on adding file to NODE Struct\n");//THis adds the file to a piece of memory like a pointer (NODES.CPP)
+                        if((l = N1.add_file(buff, data_file))!=1)printf("Error on adding file to NODE Struct\n");//THis adds the file to a piece of memory like a pointer (NODES.CPP)
                     }   //IF FLAG
                     //CALL SENDBACK(SEG NUMBER)
                     else
@@ -316,11 +317,10 @@ void Recieve(unsigned address, dataset * data_file, node * node_list, edge ** ed
 
 //Send back (FILE SEG NUM ,Sendindging port , //IP )
 //find it in nugget make = to char pointer
-SendBack(int seg,int port, char* IP ,int fileid){
-Node to send:||char* msg   nuggetcollector(fileid,seg);
-
-    Node N1 = sharefile(//Fields here...)
-    ClientCreate(IP, msg, PORT  ); 
+void SendBack(int* segnumber,int port, char* IP ,int fileid,char* msg){
+// Node to send:||char* msg   nuggetcollector(fileid,seg);
+//ADD FIND THE SEGMENT FUNCTION HERE
+ ClientCreate(port, msg  ); 
 }
 //then call client send
 
@@ -431,9 +431,9 @@ void FileDistro(dataset * file, int address, node * node_list,
         printf("Finished assembling segment %i.\n", seg);
         printf("%s\n\n", message);
         // int DEST_PORT = PortParser(message); 
-        Node N = PortParser(message);
+        NodeInfo N = PortParser(message);
         
-        int NEXT = shortest_path(address,DEST_PORT,edge_list,node_list);
+        int NEXT = shortest_path(address,N.PORT,edge_list,node_list);
         printf("Send seg %i to port %i\n\n", seg, NEXT);
         ClientCreate(NEXT,message);
         index = index + seg_size;
@@ -444,39 +444,41 @@ void FileDistro(dataset * file, int address, node * node_list,
 }
 
 
-Node PortParser(char* buff){
-    Node N;
+NodeInfo PortParser(char* buff){
+    NodeInfo N;
     char * copy = (char*)malloc(MX_STR_LEN * sizeof(char));
     strcpy(copy, buff);
     char * parse = (char*)malloc(MX_STR_LEN * sizeof(char));
     int count =0;
     parse = strtok(copy, ".");
-    while (parse != NULL)
+    while (count <5)
   {
 
     printf ("%s\n",parse);
     parse = strtok (NULL, ".");
     if(0 ==count){
     //Add specific sections lookinto 
+    strcpy(parse,N.IP);
     }
     if(1 ==count){
-        
+    N.PORT = atoi(parse);
     }
     if(2 ==count){
-        
+    N.FLAG = atoi(parse);
     }
     if(3 ==count){
-        
+    N.FILEID = atoi(parse);
+    }
+    if(5 == count){
+        strcpy(buff,N.MSG);
     }
     if(4 ==count){
-        
+    N.SEGNUM = atoi(parse);
     }
-    if(5 ==count){
-        
-    }
-
 
     count++;
   }
+  free(copy);
+    //FREE PARSE TEST IN TSTING)
   return N;
 }
