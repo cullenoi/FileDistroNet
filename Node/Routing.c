@@ -165,12 +165,20 @@ int * shortest_path(int startNode, edge ** e_list, node * n_list){
 
 
     // return next hop...
+    // printf("route test to 1161\n");
     // int next_hop;
-    // u = endNode;
+    // u = 1161;
     // while(u != startNode){
+    //     printf("%i -> ", u);
     //     next_hop = u;
     //     u = map[u];
     // }
+    // printf(" %i \n", u);
+
+    // for(int i=0; i<nList_size; i++){
+    //     printf("%i -> %i\n", i, map[i]);
+    // }
+
 
     // return map array...
     free_memory();

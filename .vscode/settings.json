@@ -3,6 +3,9 @@
         "P2P.C": "cpp",
         "*.ipp": "cpp",
         "string": "cpp",
-        "coroutine": "cpp"
+        "coroutine": "cpp",
+        "system_error": "cpp",
+        "node.h": "c",
+        "request.h": "c"
     }
 }

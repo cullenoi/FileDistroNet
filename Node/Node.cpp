@@ -45,8 +45,10 @@ int Node::init_node(char * argv[]){
     printf("Loading edges...\n");
     edge_list = load_edges(argv[4]);
     printf("Loading list of files...\n");
+    memset(file_list, 0,fList_size);
     load_files(argv[5]);
     printf("Calculating static map...\n");
+
     map = shortest_path(address, edge_list, address_book);
     return 1;
 }
@@ -95,18 +97,17 @@ node * Node::load_nodes (char *fname){
     // init
     FILE * csv = fopen(fname, "r");
     char row[MX_STR_LEN];
-    fgets(row, MX_STR_LEN, csv);
     node * N = (node*)malloc(sizeof(node));
     node * temp, * head = N;
     head->next = NULL;
     // go though the file and add all nodes to the list.
     while(!feof(csv)){
+        fgets(row, MX_STR_LEN, csv);
         node * N = (node*)malloc(sizeof(node));
         N->id = atoi(row);
         temp = head;
         N->next = head;
         head = N;
-        fgets(row, MX_STR_LEN, csv);
     }
     printf("Loaded nodes\n");
     return head;
@@ -118,9 +119,6 @@ edge ** Node::load_edges (char *fname){
 
     char row[MX_STR_LEN];
     char * token;
-
-    fgets(row, MX_STR_LEN, csv);
-
 
     while(!feof(csv)){
         edge * D1 = (edge*)malloc(sizeof(edge));
@@ -273,13 +271,13 @@ int Node::add_file(char * dataseg, dataset * data_file){
     data_file = new_data;
     char * parse = (char*)malloc(MX_STR_LEN * sizeof(char));
     // parse msg
-    parse = strtok(dataseg, ".");
+    parse = strtok(dataseg, "-");
     printf("Adding file to node %s..", parse);
     // read in file ID
-    parse = strtok(NULL, ".");
+    parse = strtok(NULL, "-");
     data_file->id = atoi(parse);
     // read in seg ID
-    parse = strtok(NULL, ".");
+    parse = strtok(NULL, "-");
     data_file->seg = atoi(parse);
     // read in data
     parse = strtok(NULL, "\0");
@@ -294,7 +292,8 @@ int Node::add_file(char * dataseg, dataset * data_file){
 char * Node::share_file(dataset * file, int seg, int seg_size, int index, int dest){
     // parse the file into x amount of pieces.
     printf("create data packet: %i\n", seg);
-    char point = '|';
+    char * point = (char*)malloc(sizeof(char));
+    point[0] = '-';
 
     char * msg = (char*)malloc(MX_STR_LEN * sizeof(char));
     if(msg ==NULL){
@@ -309,23 +308,23 @@ char * Node::share_file(dataset * file, int seg, int seg_size, int index, int de
     memset(msg,0,sizeof(char)*MX_STR_LEN);
 
     // add appropriate dest port from array
-    sprintf(int_char, "%d", dest);
+    sprintf(int_char, "%i", dest);
     strcat(msg, int_char);
-    strcat(msg, &point);
+    strcat(msg, "-");
     // declare this is a 'send' msg
-    sprintf(int_char, "%d", RECEIVE);
+    sprintf(int_char, "%i", RECEIVE);
     strcat(msg, int_char);
-    strcat(msg, &point);
+    strcat(msg, "-");
     //printf("%s\n", msg);
     // cout << msg << endl;
-    sprintf(int_char, "%d", file->id);
+    sprintf(int_char, "%i", file->id);
     strcat(msg, int_char);
-    strcat(msg, &point);
+    strcat(msg, "-");
     //printf("%s\n", msg);
     // cout << msg << endl;
-    sprintf(int_char, "%d", seg);
+    sprintf(int_char, "%i", seg);
     strcat(msg, int_char);
-    strcat(msg, &point);
+    strcat(msg, "-");
     //printf("%s\n", msg);
     //cout << msg << endl;
 
@@ -340,9 +339,10 @@ char * Node::share_file(dataset * file, int seg, int seg_size, int index, int de
             buffer = file->word[j];
             strcat(msg, &buffer);
         }
-        strcat(msg, &end);
+        strcat(msg, "\0");
         //printf("%s\n", msg);
         free(int_char);
+        free(point);
         return msg;
     }
     else{
@@ -350,9 +350,10 @@ char * Node::share_file(dataset * file, int seg, int seg_size, int index, int de
             buffer = file->word[j];
             strcat(msg, &buffer);
         }
-        strcat(msg, &end);
+        strcat(msg, "\0");
         //printf("%s\n", msg);
         free(int_char);
+        free(point);
         return msg;
     }
     
@@ -371,13 +372,16 @@ char * Node::return_file_seg(int dest_port, int file_id, int file_seg){
             // build msg.
             sprintf(buffer, "%i", dest_port);
             strcat(data_seg,buffer);
-            strcat(data_seg, ".");
+            strcat(data_seg, "|");
+            sprintf(buffer, "%i", RECEIVE);
+            strcat(data_seg, buffer);
+            strcat(data_seg, "|");
             sprintf(buffer, "%i", curr->id);
             strcat(data_seg, buffer);
-            strcat(data_seg, ".");
+            strcat(data_seg, "|");
             sprintf(buffer, "%i", curr->seg);
             strcat(data_seg, buffer);
-            strcat(data_seg, ".");
+            strcat(data_seg, "|");
             strcpy(buffer, curr->word);
             strcat(data_seg, buffer);
             return data_seg;

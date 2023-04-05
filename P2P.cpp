@@ -5,7 +5,7 @@
 
 #include <iostream>
 #include <vector>
-#include <string>
+//#include <string>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -94,20 +94,20 @@ int main(int argc, char *argv[]){
 	if(!N1.init_node(argv)){
 		printf("Err in init node (port id: %i)\n", atoi(argv[1]));
 	}
-    printf("file id: %i\n", N1.get_file()->id);
     int file = N1.get_file()->id;
     node * list = N1.get_node_list();
     node * curr = list;
     edge ** e_arr = (N1.get_edge_list());
     edge * e_head;
     PORT = N1.get_address();//GLOBALLY SETS PORT NUMBER 
+    int * map = N1.get_map();
     printf("Server thread start\n");
 ///////////////////////////////////////////////////////////////// 
 //Server Section:
 //////////////////////////////////////////////////////////////////
 pthread_mutex_init(&mutex,NULL);
- argy A ;    //= (argy*)malloc(sizeof(argy));
- 
+argy A ;    //= (argy*)malloc(sizeof(argy));
+
 int my_port = N1.get_address();
 (A.portptr) = my_port;
 (A).data_file = N1.get_data_list();
@@ -129,14 +129,11 @@ if(xy){
     exit(-1);
 }
 int ch; 
-printf("file id: %i\n", N1.get_file()->id);
-printf("\nPlease Select the following options: >>>\n1.Publish File\n0.Quit\n Or ..Wait\n");
-    printf("\nEnter choice:");
-
-    do
-    {
+    do {
+        printf("\nPlease Select the following options: >>>\n1.Publish File\n");
+        printf("2.Request File\n0.Quit\n");
+        printf("\nEnter choice:");
         scanf("%d", &ch);
-        printf("file id: %i\n", N1.get_file()->id);
         switch (ch)
         {
         case 1:
@@ -150,14 +147,9 @@ printf("\nPlease Select the following options: >>>\n1.Publish File\n0.Quit\n Or 
             int input;
             cin >> input;
             if(input){
-                RequestFile(N1.get_address(), input, N1.get_node_list(), N1.get_map(), N1.get_address());
+                RequestFile(input, N1.get_node_list(), N1.get_map(), N1.get_address());
             } else {
-                while(!input){
-                    N1.printFileList();
-                    printf("Enter a file ID to request the file.\n");
-                    cin >> input;
-                }
-                RequestFile(N1.get_address(), input, N1.get_node_list(), N1.get_map(), N1.get_address());
+                N1.printFileList();
             }
             break;
         case 0:
@@ -174,6 +166,9 @@ pthread_mutex_destroy(&mutex);
 
 }
 
+void RequestHandler(){
+
+}
 int Server()
 {
     // int sockfd , talkfd ;//SOCKET FILE DESCRIPTOR returns -1 on errno
@@ -235,8 +230,7 @@ void Recieve(unsigned address, dataset * data_file, int * map)// delete after us
 
 
         // TODO FIX THIS THINGY
-      while (1)
-    {
+      while (1){
      
         read = active;
 
@@ -261,7 +255,7 @@ void Recieve(unsigned address, dataset * data_file, int * map)// delete after us
                         perror("accept");
                         exit(EXIT_FAILURE);
                     }
-                    printf("accepting message\n");
+                    printf("\n\nAccepting message\n");
                     FD_SET(client_socket, &active);
                 }
                 else
@@ -275,42 +269,43 @@ void Recieve(unsigned address, dataset * data_file, int * map)// delete after us
                     printf("my_port: %i\n", PORT);
                     printf("%s  = buff\n",buff);
                     REC_PORT = PortParser(buff);
-
+                    printf("RecPort: %i", REC_PORT);
 
                     if(REC_PORT == PORT)//Meant to be here 
                     {   
                         printf("Message in: %s ", buff);
                         // Check if msg is request or receive
-                        if(PortParser(buff)){
+                        if(Req(buff)){
                             // message is for receiving
                             int l = 0;
-                        printf("Recieved Package!\n");
-                        if(l = N1.add_file(buff, data_file)!=1)
-                            printf("Error on adding file to NODE Struct\n");
+                            printf("Recieved Package!\n");
+                            if(l = N1.add_file(buff, data_file)!=1)
+                                printf("Error on adding file to NODE Struct\n");
                         //THis adds the file to a piece of memory like a pointer (NODES.CPP)
                         } else {
                             // message is a request
                             printf("Received Request!\n");
                             // search the data structure for the file seg
                             /*
-                             * if(file_search()){
+                                * if(file_search()){
                                 ClientCreate(client, data);
-                             } else{
+                                } else{
                                 construct error case
                                 DEST|2|FileID|PortID|PORT
-                             }
+                                }
                             */
                         }
-                    }
-                    else
-                    {//CONOR HELP WITH DEFS PLEASE HERE :)
-                    //#FIXME: 
-                        int NEXT_PORT = 0;
-                        // edge ** e_list = X.get_edge_list;
-                        // node * n_list = X.get_node_list;
-                        printf("INT CHECK == %d\n",NEXT_PORT);
-                        NEXT_PORT = map[REC_PORT]; //FIND NEXT BEST PLACE TO MOVE ON
-                        printf("INT CHECK == %d\n",NEXT_PORT);
+                    } else {//CONOR HELP WITH DEFS PLEASE HERE :)
+                        //#FIXME: DONE
+                        int next_hop;
+                        int u = REC_PORT;
+                        while(u != address){
+                            next_hop = u;
+                            u = map[u];
+                        }
+                        int NEXT_PORT = next_hop;
+                        //FIND NEXT BEST PLACE TO MOVE ON
+                        printf("Message for %i: Relay to %d\n",REC_PORT, NEXT_PORT);
                         ClientCreate(NEXT_PORT,buff);//send it to this address and next port.
                     }//
                     close(i);
@@ -404,23 +399,29 @@ void FileDistro(dataset * file, int address, node * node_list, int * map){
     int seg_size = (file->char_count)/num_of_segs;
     int index = 0;
     
-    printf("Finish init FileDistro\n");
+    printf("Init FileDistro\n");
     
     for(int i=0; i<num_of_segs; i++){
-        char * message = (char*)malloc(MX_STR_LEN * sizeof(char));
-        if(message==NULL){
-            printf("Malloc Failed\n");
-        }
         // share multiple copies of each seg, for redundancy
         // get a list of DEST nodes...
         int * dest_port = rendezvous(file->id, seg, node_list, address);
+        printf("\nFile: %i\n Seg: %i\n\n", file->id, seg);
         for (int i=0; i<REDUNDANCY; i++){
+            char * message = (char*)malloc(MX_STR_LEN * sizeof(char));
+            printf("Destination: %i\n", dest_port[i]);
             message = N1.share_file(file, seg, seg_size, index, dest_port[i]);
             //that makes string into segments and assigns the segments to portn numbers in the form "111.5345."ARG""
             printf("Finished assembling segment %i.\n", seg);
             printf("%s\n\n", message);
             //int DEST_PORT = PortParser(message); 
-            int NEXT = map[dest_port[i]];
+            // get the next hop;
+            int next_hop;
+            int u = dest_port[i];
+            while(u != address){
+                next_hop = u;
+                u = map[u];
+            }
+            int NEXT = next_hop;
             printf("Send seg %i to port %i\n\n", seg, NEXT);
             ClientCreate(NEXT,message);
         }
@@ -434,7 +435,7 @@ int PortParser(char* buff){
     char * copy = (char*)malloc(MX_STR_LEN * sizeof(char));
     strcpy(copy, buff);
     char * parse = (char*)malloc(MX_STR_LEN * sizeof(char));
-    parse = strtok(copy, ".");
+    parse = strtok(copy, "-");
     //printf("PASER SAYS %s.\n", parse);
     return atoi(parse);
 }
