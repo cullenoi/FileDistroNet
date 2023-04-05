@@ -30,7 +30,15 @@
 void Recieve(unsigned address, dataset * data_file, int * map);
 
 /// @brief CLIENT SIDE///// These could be made simply as called in function noneeed fr global
+typedef struct NodeInfor{
+int PORT;
+char* IP;
+char* MSG;
+int FLAG;
+int FILEID;
+int SEGNUM;
 
+}NodeInfo;
 int ClientCreate(int PORT_server,char *buffer);
 
 void FileDistro(dataset * file, int address, node * node_list, int * map);
