@@ -215,7 +215,7 @@ return 0;
 
 
 
-void Recieve(unsigned address, dataset * data_file, int * map)// delete after usage..
+oid Recieve(unsigned address, dataset * data_file, node * node_list, edge ** edge_list)// delete after usage..
 {
     
     fd_set active, read;
@@ -230,7 +230,8 @@ void Recieve(unsigned address, dataset * data_file, int * map)// delete after us
 
 
         // TODO FIX THIS THINGY
-      while (1){
+      while (1)
+    {
      
         read = active;
 
@@ -255,7 +256,7 @@ void Recieve(unsigned address, dataset * data_file, int * map)// delete after us
                         perror("accept");
                         exit(EXIT_FAILURE);
                     }
-                    printf("\n\nAccepting message\n");
+                    printf("accepting message\n");
                     FD_SET(client_socket, &active);
                 }
                 else
@@ -268,44 +269,32 @@ void Recieve(unsigned address, dataset * data_file, int * map)// delete after us
                     //ADD ERROR COND FOR N
                     printf("my_port: %i\n", PORT);
                     printf("%s  = buff\n",buff);
-                    REC_PORT = PortParser(buff);
-                    printf("RecPort: %i", REC_PORT);
+                    // REC_PORT = PortParser(buff);//replace with Node parser....
+                    // int FLAGPARSER = FlagParser(buff);//Placeholder add function which seperates fully tbh
+                    // int seg,port,fileid;
+                    // char* IP;
+                    NodeInfo N = PortParser(buff);
 
-                    if(REC_PORT == PORT)//Meant to be here 
-                    {   
-                        printf("Message in: %s ", buff);
-                        // Check if msg is request or receive
-                        if(Req(buff)){
-                            // message is for receiving
-                            int l = 0;
-                            printf("Recieved Package!\n");
-                            if(l = N1.add_file(buff, data_file)!=1)
-                                printf("Error on adding file to NODE Struct\n");
-                        //THis adds the file to a piece of memory like a pointer (NODES.CPP)
-                        } else {
-                            // message is a request
-                            printf("Received Request!\n");
-                            // search the data structure for the file seg
-                            /*
-                                * if(file_search()){
-                                ClientCreate(client, data);
-                                } else{
-                                construct error case
-                                DEST|2|FileID|PortID|PORT
-                                }
-                            */
+                    if(N.PORT == PORT)//Meant to be here 
+                    {
+                        if(1==N.FLAG){
+                            SendBack( N.SEGNUM, N.PORT,  N.IP , N.FILEID,N.MSG );
                         }
-                    } else {//CONOR HELP WITH DEFS PLEASE HERE :)
-                        //#FIXME: DONE
-                        int next_hop;
-                        int u = REC_PORT;
-                        while(u != address){
-                            next_hop = u;
-                            u = map[u];
-                        }
-                        int NEXT_PORT = next_hop;
-                        //FIND NEXT BEST PLACE TO MOVE ON
-                        printf("Message for %i: Relay to %d\n",REC_PORT, NEXT_PORT);
+                        else 
+                        int l = 0;
+                        printf("Recieved Package!\n");
+                        if((l = N1.add_file(buff, data_file))!=1)printf("Error on adding file to NODE Struct\n");//THis adds the file to a piece of memory like a pointer (NODES.CPP)
+                    }   //IF FLAG
+                    //CALL SENDBACK(SEG NUMBER)
+                    else
+                    {//CONOR HELP WITH DEFS PLEASE HERE :)
+                    //#FIXME: 
+                        int NEXT_PORT = 0;
+                        // edge ** e_list = X.get_edge_list;
+                        // node * n_list = X.get_node_list;
+                        printf("INT CHECK == %d\n",NEXT_PORT);
+                        NEXT_PORT = shortest_path(PORT,REC_PORT,edge_list,node_list); //FIND NEXT BEST PLACE TO MOVE ON
+                        printf("INT CHECK == %d\n",NEXT_PORT);
                         ClientCreate(NEXT_PORT,buff);//send it to this address and next port.
                     }//
                     close(i);
@@ -318,6 +307,14 @@ void Recieve(unsigned address, dataset * data_file, int * map)// delete after us
             break;
     }
     return;
+}
+
+//Send back (FILE SEG NUM ,Sendindging port , //IP )
+//find it in nugget make = to char pointer
+void SendBack(int* segnumber,int port, char* IP ,int fileid,char* msg){
+// Node to send:||char* msg   nuggetcollector(fileid,seg);
+//ADD FIND THE SEGMENT FUNCTION HERE
+ ClientCreate(port, msg  ); 
 }
 
 ////////////Client Functions://///////////////////////////////////////////////////////////////
