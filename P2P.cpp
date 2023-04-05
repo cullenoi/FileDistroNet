@@ -25,12 +25,17 @@ node * curr;
 edge ** e_arr;
 edge * e_head;
 
+int sockfd , talkfd ;//SOCKET FILE DESCRIPTOR returns -1 on errno
+struct sockaddr_in hints;
+struct sockaddr_in their_addr;
+socklen_t addr_size;
+
+int PORT;
 
 typedef struct argy {
     int portptr;
     dataset * data_file;
-    node * node_list;
-    edge ** edge_list;
+    int * map;
 } argy;
 
 
@@ -51,10 +56,11 @@ int err=0;
 void *ServerT( void* A){
     printf("IN server\n");
     argy *B = (argy *)A;
-    int addr= B->portptr;
-     node * node_list = B->node_list;
-    edge ** edge_list = B->edge_list; 
-    dataset* data_file = B->data_file;
+
+    int addr = B->portptr;
+    dataset * data_file = B->data_file;
+    int * map = B->map;
+
     if(listen(sockfd,BACKLOG)<0)//-1 = errno
     {
         printf("INIT_Server socket Listening failed...\n");
@@ -70,7 +76,7 @@ void *ServerT( void* A){
     
 while(1){
     sleep(3);//Sleep for a bit to allow the client to do stuff..a
-    Recieve(addr, data_file, node_list, edge_list);//ATM NO NEED TO CALL ANYTHING BECAUSE WE USE GLOBAL VAR RN
+    Recieve(addr, data_file, map);//ATM NO NEED TO CALL ANYTHING BECAUSE WE USE GLOBAL VAR RN
 // Command exits as connection is finished..
     //TODO simple messaging for DEV Please remove afterusage....
     }
@@ -101,11 +107,12 @@ int main(int argc, char *argv[]){
 //////////////////////////////////////////////////////////////////
 pthread_mutex_init(&mutex,NULL);
  argy A ;    //= (argy*)malloc(sizeof(argy));
+ 
 int my_port = N1.get_address();
 (A.portptr) = my_port;
 (A).data_file = N1.get_data_list();
-A.node_list = N1.get_node_list();
-A.edge_list = N1.get_edge_list();
+A.map = N1.get_map();
+
 static pthread_t Serv;
 int fail;
 long xy;
@@ -343,7 +350,8 @@ int ClientCreate(int PORT_server,char *buffer)
     if( (Csockfd = socket(AF_INET,SOCK_STREAM,0))<0){ //Lets you choose TCP||UDP STREAM||DATAGRAM AI_INET||AI_INET6(Ip_addresse types..)
         fprintf(stderr,"ERROR Client getting socket: %s\n",gai_strerror(Csockfd));
         return 1;//returning one as error check i
-    #define PORT "3490"  // the port users will be connecting to
+    }
+    int force = 1;
 
     if (setsockopt(Csockfd, SOL_SOCKET,SO_REUSEADDR, &force, sizeof(force)))//FORCES THIS SOCKET FileDESC TO THE PORT
     {
@@ -383,8 +391,6 @@ int ClientCreate(int PORT_server,char *buffer)
 	close(Csockfd);
     return 0;   
 	
-}
-
 }
 //NOTE SHOULD PASS IN NODE ADDRESSLIST
 void FileDistro(dataset * file, int address, node * node_list, int * map){

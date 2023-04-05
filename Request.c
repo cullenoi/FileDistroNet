@@ -1,6 +1,7 @@
 #include "PublicDef.h"
 #include "Node/Tracker.h"
 #include "Node/Node.h"
+#include "Request.h"
 
 #define REQUEST 0
 

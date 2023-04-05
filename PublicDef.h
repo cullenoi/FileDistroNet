@@ -18,10 +18,7 @@
 #include "Node/Node.h"
 #include "Node/Tracker.h"
 
- int sockfd , talkfd ;//SOCKET FILE DESCRIPTOR returns -1 on errno
- struct sockaddr_in hints;
- struct sockaddr_in their_addr;
- socklen_t addr_size;
+
 
 
 #define _SS_PAD1SIZE 3000
@@ -30,8 +27,9 @@
 #define SA struct sockaddr
 /////////server side//
 
+void Recieve(unsigned address, dataset * data_file, int * map);
+
 /// @brief CLIENT SIDE///// These could be made simply as called in function noneeed fr global
-int PORT;
 
 int ClientCreate(int PORT_server,char *buffer);
 

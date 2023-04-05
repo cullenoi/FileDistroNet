@@ -13,7 +13,7 @@
 // construct list update message
 char * list_update(int dest, int cmd, int new_node, int connect, int qual){
 
-    char msg[MX_MSG_LEN];
+    char * msg = (char*)malloc(MX_MSG_LEN * sizeof(char));
     char buffer[MX_MSG_LEN];
     
     sprintf(buffer, "%i", dest);
@@ -37,6 +37,8 @@ char * list_update(int dest, int cmd, int new_node, int connect, int qual){
     strcat(msg, ".");
     sprintf(buffer, "%i", qual);
     strcat(msg, "\0");
+
+    return msg;
 }
 // void list_add(node * n_head, edge ** e_head, int new, int connect, int qual){
 
