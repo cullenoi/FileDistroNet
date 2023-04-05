@@ -95,6 +95,10 @@ int main(int argc, char *argv[]){
 		printf("Err in init node (port id: %i)\n", atoi(argv[1]));
 	}
     int file = N1.get_file()->id;
+    node * list = N1.get_node_list();
+    node * curr = list;
+    edge ** e_arr = (N1.get_edge_list());
+    edge * e_head;
     PORT = N1.get_address();//GLOBALLY SETS PORT NUMBER 
     int * map = N1.get_map();
     printf("Server thread start\n");
@@ -143,9 +147,7 @@ int ch;
             int input;
             cin >> input;
             if(input){
-                if(RequestFile(input, N1.get_node_list(), N1.get_map(), N1.get_address())){
-                    printf("Seeking Files\n");
-                } else printf("Error Seeking Files, try another file.\n");
+                RequestFile(input, N1.get_node_list(), N1.get_map(), N1.get_address());//I NEED ASSISTANCE
             } else {
                 N1.printFileList();
             }
@@ -213,7 +215,7 @@ return 0;
 
 
 
-void Recieve(unsigned address, dataset * data_file, int * map)// delete after usage..
+void Recieve(unsigned address, dataset * data_file, node * node_list, edge ** edge_list)// delete after usage..
 {
     
     fd_set active, read;
@@ -254,7 +256,7 @@ void Recieve(unsigned address, dataset * data_file, int * map)// delete after us
                         perror("accept");
                         exit(EXIT_FAILURE);
                     }
-                    printf("\n\nAccepting message\n");
+                    printf("accepting message\n");
                     FD_SET(client_socket, &active);
                 }
                 else
@@ -273,28 +275,26 @@ void Recieve(unsigned address, dataset * data_file, int * map)// delete after us
                     // char* IP;
                     NodeInfo N = PortParser(buff);
 
-                    if(N.PORT == PORT){
-                        if(!N.FLAG){
+                    if(N.PORT == PORT)//Meant to be here 
+                    {
+                        if(1==N.FLAG){
                             SendBack( N.SEGNUM, N.PORT,  N.IP , N.FILEID,N.MSG );
                         }
-                        else{
+                        else 
                         int l = 0;
                         printf("Recieved Package!\n");
-                            if(l = N1.add_file(buff, data_file)!=1)
-                                printf("Error on adding file to NODE Struct\n");
-                        //THis adds the file to a piece of memory like a pointer (NODES.CPP)
-                        }       
-                    } else {//CONOR HELP WITH DEFS PLEASE HERE :)
-                        //#FIXME: DONE
-                        int next_hop;
-                        int u = REC_PORT;
-                        while(u != address){
-                            next_hop = u;
-                            u = map[u];
-                        }
-                        int NEXT_PORT = next_hop;
-                        //FIND NEXT BEST PLACE TO MOVE ON
-                        printf("Message for %i: Relay to %d\n",REC_PORT, NEXT_PORT);
+                        if((l = N1.add_file(buff, data_file))!=1)printf("Error on adding file to NODE Struct\n");//THis adds the file to a piece of memory like a pointer (NODES.CPP)
+                    }   //IF FLAG
+                    //CALL SENDBACK(SEG NUMBER)
+                    else
+                    {//CONOR HELP WITH DEFS PLEASE HERE :)
+                    //#FIXME: 
+                        int NEXT_PORT = 0;
+                        // edge ** e_list = X.get_edge_list;
+                        // node * n_list = X.get_node_list;
+                        printf("INT CHECK == %d\n",NEXT_PORT);
+                        NEXT_PORT = shortest_path(PORT,REC_PORT,edge_list,node_list); //FIND NEXT BEST PLACE TO MOVE ON
+                        printf("INT CHECK == %d\n",NEXT_PORT);
                         ClientCreate(NEXT_PORT,buff);//send it to this address and next port.
                     }//
                     close(i);
@@ -312,7 +312,7 @@ void Recieve(unsigned address, dataset * data_file, int * map)// delete after us
 //Send back (FILE SEG NUM ,Sendindging port , //IP )
 //find it in nugget make = to char pointer
 void SendBack(int* segnumber,int port, char* IP ,int fileid,char* msg){
-// Node to send:||char* msg   nuggetcollector(fileid,seg);
+// Node to send:||char* msg   nuggetcollector(fileid,seg);@
 //ADD FIND THE SEGMENT FUNCTION HERE
  ClientCreate(port, msg  ); 
 }
