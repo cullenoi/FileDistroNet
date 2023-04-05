@@ -154,26 +154,33 @@ pthread_mutex_destroy(&mutex);
 
 }
 
-
-//File ID
-// AH ENTER FILE NUMBER
-// SCANFS the us
-// CALLL CHECK SEGV_MTESERR
-
-
-// WHILE NOT ALLL SEGS [PRESENT] WAIT 3S AND THEN CHEACH BST (NUGGY)
-
-// WHEN ALL PRESENT 
-// break;
-
-// BUILD
-// //
+/*
+*   @brief Takes the file id as input checks the segment that it already has, or wait till it receives all of them (create request for other segments ig)
+*          send that request (rendevouz function), wait till it receives all of them, then build
+*
+*/
+int collect_file() {
+    // STEPS:
+    //File ID
+    // AH ENTER FILE NUMBER
+    // SCANFS the us
+    // CALLL CHECK SEGV_MTESERR
 
 
-// CHECK SEGS
-// GOES THROUGH NUGGET BST AND SEES WHAT SEGS WE ALREADY HAVE 
-// LOOPING FUNCTION WHICH CALLS MESSAGE MAKER (FILE DISTRO) AND THEN CALLS SEND MESSAGE TO Client_h
+    // WHILE NOT ALLL SEGS [PRESENT] WAIT 3S AND THEN CHECK BT (NUGGY)
 
+    // WHEN ALL PRESENT 
+    // break;
+
+    // BUILD
+    // //
+
+
+    // CHECK SEGS
+    // GOES THROUGH NUGGET BT AND SEES WHAT SEGS WE ALREADY HAVE 
+    // LOOPING FUNCTION WHICH CALLS MESSAGE MAKER (FILE DISTRO) AND THEN CALLS SEND MESSAGE TO Client
+
+}
 
 
 
