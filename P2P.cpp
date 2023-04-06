@@ -488,13 +488,11 @@ void FileDistro(dataset * file, int address, node * node_list, int * map){
             printf("%s\n\n", message);
             //int DEST_PORT = PortParser(message); 
             // get the next hop;
-            printf("| \n");
             int NEXT = next_hop(dest_port[i], address, map);
-            printf("| \n");
             // func -> find IP
             //IP LOOKUP TODO
-            printf("Next = %d",NEXT);
-            int index = NEXT + IPSTART;
+            printf("Next = %d\n",NEXT);
+            int index = NEXT - IPSTART;
             char* IP = IP_index[index];
             printf("Send seg %i to port %i\n\n", seg, NEXT);
             ClientCreate(IP,NEXT,message);
