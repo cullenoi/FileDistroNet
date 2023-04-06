@@ -17,7 +17,7 @@ node * N_List[nList_size];
 void create_N_List(node * n_list){
     node * curr = n_list;
     while(curr){
-        N_List[(curr->id - PORT_OFFSET)] = curr;
+        N_List[(curr->id )] = curr;
         curr = curr->next;
     }
 }
@@ -55,7 +55,7 @@ void priority_q(Queue * q, node * v, int * dist){
         q->head = v;
     else{
         // find edge position in weighted priority queue
-        while(dist[((curr->id) - PORT_OFFSET)] > dist[((v->id) - PORT_OFFSET)] || curr != NULL){
+        while(dist[((curr->id) )] > dist[((v->id) )] || curr != NULL){
             prev = curr;
             curr = curr->q_next;
         }
@@ -108,7 +108,7 @@ int search_Edges(int u, int v, edge ** e_list){
     //return weight if edge exists..
     edge * curr = *(e_list + u);
     while(curr){
-        if((curr->id - PORT_OFFSET) == v){
+        if((curr->id ) == v){
             return curr->weight;
         }
         curr = curr->e_next;
@@ -142,7 +142,7 @@ int * shortest_path(int startNode, edge ** e_list, node * n_list){
         dist[i] = __INT_MAX__; //set as 'unexplored'
         prev[i] = NULL;
     }
-    dist[startNode - PORT_OFFSET] = 0;
+    dist[startNode] = 0;
     int u;
 
     for (int i=0; i<nList_size; i++){
@@ -155,7 +155,7 @@ int * shortest_path(int startNode, edge ** e_list, node * n_list){
                     && dist[u] != __INT_MAX__  
                     && dist[u] + search_Edges(u,v,e_list) < dist[v]){
                     dist[v] = dist[u] + search_Edges(u,v,e_list);
-                    map[v] = (u + PORT_OFFSET);
+                    map[v] = (u );
                 }
             }
         }
@@ -226,7 +226,7 @@ int next_hop(int dest, int self, int * map){
         count++;
         if(count > 100) break;
         next_hop = u;
-        u = map[(u - PORT_OFFSET)];
+        u = map[(u)];
     }
     return next_hop;
 }

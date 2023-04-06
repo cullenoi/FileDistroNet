@@ -243,7 +243,7 @@ void Recieve(unsigned address, dataset * data_file, int * map)// delete after us
     int k=0;
     int n;
     char buff[MX_STR_LEN]={0};
-        PORT = address;//GLOBALLY SETS PORT NUMBER 
+        PORT = address+ IPSTART;//GLOBALLY SETS PORT NUMBER 
 
 
         // TODO FIX THIS THINGY
