@@ -225,7 +225,6 @@ int next_hop(int dest, int self, int * map){
     while(u != self){
         count++;
         if(count > 100) break;
-        printf(" -> %i\n", u);
         next_hop = u;
         u = map[(u - PORT_OFFSET)];
     }
