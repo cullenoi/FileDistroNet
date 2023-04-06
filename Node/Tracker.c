@@ -137,7 +137,7 @@ int hash(int key, int seg, int node){
     mul = mul % 1432;
     mul = mul * key % 191;
     mul = mul * 54 * seg;
-    mul = mul + node;
+    mul = mul + (node - 34422);
     mul = mul + seg * 3;
     mul = mul % 12487;
     return mul;

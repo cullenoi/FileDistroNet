@@ -94,21 +94,22 @@ struct file_node * find_node(struct file_node * root, int value){
 struct file_node *parse_message(struct file_node *root,char*dataseg){
     int id, seg, wordlength,end;
     char* word;
-
     // parse msg
+    char * copy = (char*)malloc(MX_STR_LEN * sizeof(char));
+    strcpy(copy, dataseg);
     char * parse = strtok(dataseg, "-");
     // read in file ID
-    parse = strtok(NULL, "-");
-    parse = strtok(NULL, "-");
-    parse = strtok(NULL, "-");
+    parse = strtok(copy, "-");
+    parse = strtok(copy, "-");
+    parse = strtok(copy, "-");
     id = atoi(parse);
     // read in seg ID
-    parse = strtok(NULL, "-");
+    parse = strtok(copy, "-");
     seg = atoi(parse);
-    parse = strtok(NULL, "-");
+    parse = strtok(copy, "-");
     end = atoi(parse);
     // read in data
-    parse = strtok(NULL, "\0");
+    parse = strtok(copy, "\0");
     wordlength = strlen(parse);
     word = (char*)malloc((MX_STR_LEN)*sizeof(char));
     strcpy(word, parse);
@@ -131,6 +132,8 @@ struct file_node *parse_message(struct file_node *root,char*dataseg){
     if(c->lastID != 0 && (c->lastID - 99)==c->num_data_nodes){
         c->complete = 1;
     }
+    printf("@@@@@@@@@@@@@@@\n");
+    free(copy);
     return root;
 }
 

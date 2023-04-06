@@ -263,8 +263,7 @@ void Recieve(unsigned address, dataset * data_file, int * map)// delete after us
             if (FD_ISSET(i, &read))
             {
                         //connection request on orginal socket
-                if (i == sockfd)
-                {
+                if (i == sockfd) {
                     int client_socket;
                     
                     if ((client_socket = accept(sockfd, (struct sockaddr *)&their_addr,
@@ -276,8 +275,7 @@ void Recieve(unsigned address, dataset * data_file, int * map)// delete after us
                     printf("Accepting message\n\n");
                     FD_SET(client_socket, &active);
                 }
-                else
-                {
+                else {
                     int REC_PORT = 0;
                     //data is arriving on an already connected socket
                     n = recv(i, buff, sizeof(buff), 0);
@@ -291,52 +289,57 @@ void Recieve(unsigned address, dataset * data_file, int * map)// delete after us
                     // int seg,port,fileid;
                     // char* IP;
                     NodeInfo N = PortParser(buff);
+                    printf("292\n");
 
-                    if(N.PORT == PORT)//Meant to be here 
-                    {
-                        if(!N.FLAG){
+                    if(N.PORT == PORT){
+                    //Meant to be here
+                        printf("here\n");
+                        if(N.FLAG == 0){// !=0 
+                            printf("542\n");
                             char * retReq;
-                            if(!SendBack(N.SEGNUM, N.PORT, N.IP, N.FILEID, retReq)){
-                                // construct fail msg...
-                                retReq = RequestFail(N.PORT, N.FILEID, N.SEGNUM, PORT);   
-                            }
+                            //     // construct fail msg...
+                            //     retReq = RequestFail(N.PORT, N.FILEID, N.SEGNUM, PORT);   
+                            // }
                             // Send answer to request
                             // Either being successful -> SendBack | or Failure RequestFail.
+                            printf("542\n");
                             int next = next_hop(N.PORT, PORT, map);
-                            ClientCreate(N.IP, next, retReq);
+                            //FIND NEXT BEST PLACE TO MOVE ON
+                            //IPLOOKPU HERE TOO
+                            int index = next - IPSTART ;//all calculated through routing table
+                            char* IP = IP_index[index];
+                            if(!SendBack(N.SEGNUM, N.PORT, IP, N.FILEID, retReq)) printf("Error sending back\n");
+                            // ClientCreate(IP, next, retReq);
                         }
-                        else if (N.FLAG == 1){
+                        if (N.FLAG == 1){
                         printf("Recieved Package!\n");
                         ///
                         if(!N1.add_file(buff, data_file)){
                             printf("Error on adding file to NODE Struct\n");
                         }
-                                
-                                root = parse_message(root,buff);//store data into data storage *must let equal root*
-                                if(root == NULL){
-                                    printf("Error on storing data in file node\n");
-                                }
-
+                        printf("entering root\n"); 
+                        root = parse_message(root,buff);//store data into data storage *must let equal root*
+                        if(root == NULL){
+                            printf("Error on storing data in file node\n");
+                        }
                         //THis adds the file to a piece of memory like a pointer (NODES.CPP)
-                        } else if(N.FLAG == 2){
-                            // Request answered with a failure...
-                            // Create new request msg for next node or quit...
-                            
-                        }    
+                        }
                     } else {//CONOR HELP WITH DEFS PLEASE HERE :)
                         //#FIXME: DONE
                         int NEXT_PORT = next_hop(N.PORT, PORT, map);
                         //FIND NEXT BEST PLACE TO MOVE ON
-                        //IPLOOKPU HERE TOO
-                        int index = NEXT_PORT ;//all calculated through routing table
+                        //IPLOOKPU HERE TOOS
+                        int index = NEXT_PORT -IPSTART;//all calculated through routing table
                         char* IP = IP_index[index];
                         printf("Message for %i: Relay to %d\n",N.PORT, NEXT_PORT);
+                        close(i);
+                        FD_CLR(i, &active);
 
                         ClientCreate(IP,NEXT_PORT,buff);//send it to this address and next port.
-                    }//
-                    close(i);
-                    FD_CLR(i, &active);
+                    }//////
+                    
                 }
+            printf("closing connection\n");
             }
         }
 
@@ -346,7 +349,6 @@ void Recieve(unsigned address, dataset * data_file, int * map)// delete after us
     return;
 }
 
-//Send back (FILE SEG NUM ,Sendindging port , //IP )
 //find it in nugget make = to char pointer
 int SendBack(int segnumber,int port, char* IP ,int fileid, char * msg){
 // char* msg =  nuggetcollector(fileid,seg);
@@ -355,6 +357,8 @@ int SendBack(int segnumber,int port, char* IP ,int fileid, char * msg){
         printf("ERROR! There is no file.");
         return 0;
     } else {
+        //NEEDED: Another parameter
+        memset(msg, 0, sizeof msg);
         msg = search_seg(root, fileid, segnumber);//search for file segment by ID, return message
         if(msg == NULL){//specific file segment not available
             return 0;
@@ -371,7 +375,7 @@ int SendBack(int segnumber,int port, char* IP ,int fileid, char * msg){
 int ClientCreate(char* IP,int PORT_server,char *buffer)
 {
     printf("In CLIENT\n");
-    PORT_server = PORT_server + IPSTART;
+    PORT_server = PORT_server ;
     int Csockfd =99;//SOCKET FILE DESCRIPTOR returns -1 on errno
     struct sockaddr_in Chints;// was using the addrinfo but doesnt work for single networking..
     char s[INET6_ADDRSTRLEN];//have it as length ipv6 incase good practise
@@ -481,7 +485,7 @@ void FileDistro(dataset * file, int address, node * node_list, int * map){
         printf("\nFile: %i\n Seg: %i\n\n", file->id, seg);
         for (int i=0; i<REDUNDANCY; i++){
             char * message = (char*)malloc(MX_STR_LEN * sizeof(char));
-            printf("Destination: %i\n", dest_port[i]);
+            printf("Destination: %d\n", dest_port[i]);
             message = N1.share_file(file, seg, seg_size, index, dest_port[i]);
             //that makes string into segments and assigns the segments to portn numbers in the form "111.5345."ARG""
             printf("Finished assembling segment %i.\n", seg);
@@ -511,35 +515,39 @@ NodeInfo PortParser(char* buff){
     strcpy(copy, buff);
     char * parse = (char*)malloc(MX_STR_LEN * sizeof(char));
     int count =0;
+     printf("Problem here");
     parse = strtok(copy, "-");
     while (count <5){
 
-        printf ("%s\n",parse);
-        parse = strtok (NULL, "-");
+        printf ("%s IS WHAT WE SPLIT\n",parse);
         if(0 ==count){
         //Add specific sections lookinto 
-        strcpy(parse,N.IP);
-        }
-        if(1 ==count){
         N.PORT = atoi(parse);
         }
-        if(2 ==count){
+        if(1 ==count){
         N.FLAG = atoi(parse);
         }
-        if(3 ==count){
+        if(2 ==count){
         N.FILEID = atoi(parse);
         }
-        if(4 ==count){
+        if(3 ==count){
         N.SEGNUM = atoi(parse);
-            printf("Problem here");
+        }
+        if(4 ==count){
+        N.END = atoi(parse);
         }
         if(5 == count){
-            strcpy(buff,N.MSG);
+        //    strcpy(N.MSG,buff);
+           
         }
         count++;
+        parse = strtok (NULL, "-");
   }
+//   free(parse);
+    printf("541\n");
   free(copy);
-  free(parse);//This might cause problems
+  printf("542\n");
+//   free(parse);//This might cause problems
     //FREE PARSE TEST IN TSTING)
   return N;
 }

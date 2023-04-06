@@ -33,7 +33,7 @@ void Recieve(unsigned address, dataset * data_file, int * map);
 /// @brief CLIENT SIDE///// These could be made simply as called in function noneeed fr global
 typedef struct NodeInfor{
 int PORT;
-char* IP;
+int END;
 char* MSG;
 int FLAG;
 int FILEID;
