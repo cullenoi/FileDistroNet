@@ -5,7 +5,7 @@
 
 ```BASH 
    g++ P2P.cpp Node/Node.cpp Node/Routing.c Node/Tracker.c Request.c receiver_assembler.c -o p2p
-   ./p2p 31111 Node/NodeInfo.csv Node/Nodes.txt Node/Edges.txt Node/Files.txt
+   ./p2p 1111 Node/NodeInfo.csv Node/Nodes.txt Node/Edges.txt Node/Files.txt
 
    g++ P2P.cpp Node/Node.cpp Node/Routing.c Node/Tracker.c Request.c receiver_assembler.c -o p2p
    ./p2p 31121 Node/NodeInfo.csv Node/Nodes.txt Node/Edges.txt Node/Files.txt

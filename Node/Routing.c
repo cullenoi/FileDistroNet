@@ -16,10 +16,11 @@ node * N_List[nList_size];
 
 void create_N_List(node * n_list){
     node * curr = n_list;
-    while(curr){
-        N_List[(curr->id )] = curr;
+    while(curr != NULL){
+        N_List[curr->id ] = curr;
         curr = curr->next;
     }
+    return;
 }
 
 // queue..
@@ -132,12 +133,12 @@ int * shortest_path(int startNode, edge ** e_list, node * n_list){
     //dijkstra algorithm..
     //init
     create_N_List(n_list);
+    printf("Passed?\n");
     q = create_queue();
     int dist[nList_size];
     node * prev[nList_size];
     // create pointer to memory, that will be returned
     int * map = (int*)malloc(nList_size * sizeof(int));
-
     for(int i=0; i<nList_size; i++){
         dist[i] = __INT_MAX__; //set as 'unexplored'
         prev[i] = NULL;
@@ -155,7 +156,7 @@ int * shortest_path(int startNode, edge ** e_list, node * n_list){
                     && dist[u] != __INT_MAX__  
                     && dist[u] + search_Edges(u,v,e_list) < dist[v]){
                     dist[v] = dist[u] + search_Edges(u,v,e_list);
-                    map[v] = (u );
+                    map[v] = u ;
                 }
             }
         }

@@ -135,19 +135,19 @@ edge ** Node::load_edges (char *fname){
             switch (i) {
             case 0: // V1
                 // from D1 to D2..
-                adj_head = EdgeList[(atoi(token) )];
+                adj_head = EdgeList[atoi(token)];
                 D1->id = atoi(token);
                 if(adj_head)
                     D2->e_next = adj_head;
-                EdgeList[(atoi(token) )] = D2;
+                EdgeList[atoi(token) ] = D2;
                 break;
             case 1: // V2
                 // from D2 to D1
                 D2->id = atoi(token);
-                adj_head = EdgeList[(atoi(token) )];
+                adj_head = EdgeList[atoi(token) ];
                 if(adj_head)
                     D1->e_next = adj_head;
-                EdgeList[(atoi(token) )] = D1;
+                EdgeList[atoi(token) ] = D1;
                 break;
             case 2: //weight
                 D1->weight = atoi(token);
