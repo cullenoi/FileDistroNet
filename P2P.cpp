@@ -357,7 +357,7 @@ int SendBack(int segnumber,int port, char* IP ,int fileid, char * msg){
         printf("ERROR! There is no file.");
         return 0;
     } else {
-        //NEEDED: Another parameter
+        //NEEDED: Another parameter to indicate whether its meant for it or not
         memset(msg, 0, sizeof msg);
         msg = search_seg(root, fileid, segnumber);//search for file segment by ID, return message
         if(msg == NULL){//specific file segment not available
